@@ -4,7 +4,7 @@
 // ═══════════════════════════════════════════════════════════════════════════
 
 export const networkRegions = [
-  { id: 'all', label: 'All Operating Desks', count: '34 Hubs · 21 Sea Domains' },
+  { id: 'all', label: 'All Operating Desks', count: '27 Hubs · 19 Sea Domains · 170 Ports' },
   { id: 'middle-east', label: 'Gulf & Middle East', flag: '🇦🇪', count: 'Dubai, Riyadh & Jeddah Desks' },
   { id: 'south-asia', label: 'South Asia', flag: '🇮🇳', count: 'Chennai HQ, Mumbai & Colombo' },
   { id: 'central-asia', label: 'Central Asia & CIS', flag: '🇰🇿', count: 'Almaty, Tashkent & Baku' },
@@ -12,7 +12,9 @@ export const networkRegions = [
   { id: 'southeast-asia', label: 'Southeast Asia', flag: '🇲🇾', count: 'Port Klang, Singapore, Jakarta, Laem Chabang, Ho Chi Minh City, Sihanoukville & Yangon' },
   { id: 'northeast-asia', label: 'Northeast Asia', flag: '🇨🇳', count: 'Shanghai, Shenzhen, Hong Kong, Taipei, Busan, Tokyo & Yokohama' },
   { id: 'africa', label: 'Africa', flag: '🇿🇦', count: 'Durban & Lagos' },
-  { id: 'north-america', label: 'North America', flag: '🇺🇸', count: 'Vancouver, Toronto, New York, Savannah, Los Angeles & Long Beach' }
+  { id: 'north-america', label: 'North America', flag: '🇺🇸', count: 'Vancouver, Toronto, New York, Savannah, Los Angeles & Long Beach' },
+  { id: 'south-america', label: 'South America', flag: '🇧🇷', count: 'Santos, Cartagena, Callao & San Antonio' },
+  { id: 'oceania', label: 'Oceania', flag: '🇦🇺', count: 'Sydney, Melbourne, Brisbane, Fremantle & Auckland' }
 ];
 
 export const primaryHubs = [
@@ -267,7 +269,7 @@ export const primaryHubs = [
         destinationCity: 'Almaty',
         destinationCountry: 'Kazakhstan',
         flag: '🇰🇿',
-        modes: ['AIR', 'SEA', 'RAIL'],
+        modes: ['AIR', 'SEA', 'ROAD'],
         primaryMode: 'Direct Airfreight & Middle Corridor Multimodal',
         transitTime: 'Air: 4 Hours · Multimodal: 10-14 Days',
         frequency: '4x Weekly Direct Freighters',
@@ -319,7 +321,7 @@ export const primaryHubs = [
         destinationCity: 'Tashkent',
         destinationCountry: 'Uzbekistan',
         flag: '🇺🇿',
-        modes: ['AIR', 'SEA', 'RAIL'],
+        modes: ['AIR', 'SEA', 'ROAD'],
         primaryMode: 'Airfreight & Intermodal Rail',
         transitTime: 'Air: 3.5 Hours · Multimodal: 8-10 Days',
         frequency: '3x Weekly Air Flights',
@@ -417,7 +419,7 @@ export const primaryHubs = [
         destinationCity: 'Dubai',
         destinationCountry: 'United Arab Emirates',
         flag: '🇦🇪',
-        modes: ['AIR', 'SEA', 'RAIL'],
+        modes: ['AIR', 'SEA', 'ROAD'],
         primaryMode: 'Airfreight & Multimodal INSTC Corridors',
         transitTime: 'Air: 4 Hours · Multimodal: 10-14 Days',
         frequency: '4x Weekly Direct Air Linehauls',
@@ -541,7 +543,7 @@ export const primaryHubs = [
         destinationCity: 'Dubai',
         destinationCountry: 'United Arab Emirates',
         flag: '🇦🇪',
-        modes: ['AIR', 'SEA', 'RAIL'],
+        modes: ['AIR', 'SEA', 'ROAD'],
         primaryMode: 'Direct Airfreight & Multimodal',
         transitTime: 'Air: 3.5 Hours · Multimodal: 8-10 Days',
         frequency: '3x Weekly Air Flights',
@@ -1755,7 +1757,7 @@ export const primaryHubs = [
         destinationCity: 'Almaty',
         destinationCountry: 'Kazakhstan',
         flag: '🇰🇿',
-        modes: ['AIR', 'SEA', 'RAIL'],
+        modes: ['AIR', 'SEA', 'ROAD'],
         primaryMode: 'Airfreight & Multimodal Transit',
         transitTime: 'Air: 8 Hours · Multimodal: 18 Days',
         frequency: 'Weekly Scheduled Air Linehauls',
@@ -2436,6 +2438,190 @@ export const primaryHubs = [
         outboundCargo: 'Electronics, Automotive Parts, Machinery, Textiles',
         inboundCargo: 'Electronics Components, Pharmaceuticals, Machinery Parts',
         services: ['Cross-Border Trucking', 'Air Cargo', 'Feeder Services']
+      }
+    ]
+  },
+  {
+    id: 'durban-hub',
+    regionId: 'africa',
+    country: 'South Africa',
+    city: 'Durban',
+    flag: '🇿🇦',
+    role: 'Southern Africa Maritime Gateway & Intermodal Rail Hub',
+    tier: 'Regional Operations Hub',
+    isPrimary: false,
+    address: 'Port of Durban Marine Terminal & Transnet Freight Rail, Durban, South Africa',
+    phone: '+27 31 361 8888',
+    email: 'durban@gaciscargoservices.com',
+    geo: { lat: -29.8587, lng: 31.0218 },
+    coordinates: { x: 550, y: 460 },
+    connectedSeas: ['indian-ocean-south'],
+    capabilities: ['Deepwater Container Terminal', 'Sub-Saharan Intermodal Rail', 'Automotive Terminal Logistics', 'Bulk Mineral Cargo'],
+    stats: { weeklyFlights: 'Transnet Rail Linehauls', oceanTEU: 'Direct Pier 2 Berthing', warehouseSqFt: '95,000' },
+    connectedTradeLanes: [
+      {
+        destinationId: 'lagos-hub',
+        destinationCity: 'Lagos',
+        destinationCountry: 'Nigeria',
+        flag: '🇳🇬',
+        modes: ['SEA', 'AIR'],
+        primaryMode: 'Intra-Africa Maritime Feeder & Express Air',
+        transitTime: 'Sea: 8-10 Days · Air: 6 Hours',
+        frequency: '2x Weekly Ocean Feeders',
+        outboundCargo: 'Mining Machinery, Automotive Spares, Processed Steel, Agricultural Equipment',
+        inboundCargo: 'Agricultural Commodities, Cocoa, Rubber, Petroleum By-products',
+        services: ['Sub-Saharan Coastal Feeder', 'Customs Brokerage', 'Bonded Transit']
+      },
+      {
+        destinationId: 'uae-desk',
+        destinationCity: 'Dubai',
+        destinationCountry: 'United Arab Emirates',
+        flag: '🇦🇪',
+        modes: ['SEA', 'AIR'],
+        primaryMode: 'Indian Ocean Deepsea Trunk & Air Cargo',
+        transitTime: 'Sea: 12-14 Days · Air: 8 Hours',
+        frequency: 'Weekly Direct Sailings',
+        outboundCargo: 'Minerals, Automotive Exports, Citrus Fruits, Wine',
+        inboundCargo: 'Consumer Electronics, Heavy Plant Equipment, Re-exports',
+        services: ['Reefer Cold Chain', 'Heavy Lift Project Cargo']
+      }
+    ]
+  },
+  {
+    id: 'lagos-hub',
+    regionId: 'africa',
+    country: 'Nigeria',
+    city: 'Lagos',
+    flag: '🇳🇬',
+    role: 'West Africa Commercial Gateway & Maritime Terminal',
+    tier: 'Regional Operations Hub',
+    isPrimary: false,
+    address: 'Apapa Port Complex & Tin Can Island, Lagos, Nigeria',
+    phone: '+234 1 270 4400',
+    email: 'lagos@gaciscargoservices.com',
+    geo: { lat: 6.5244, lng: 3.3792 },
+    coordinates: { x: 490, y: 310 },
+    connectedSeas: ['atlantic-north'],
+    capabilities: ['Apapa Container Gateway', 'West Africa Distribution', 'Oilfield Logistics', 'Customs Fast-Track'],
+    stats: { weeklyFlights: 'Weekly Linehauls', oceanTEU: 'Apapa Quayside Access', warehouseSqFt: '80,000' },
+    connectedTradeLanes: [
+      {
+        destinationId: 'durban-hub',
+        destinationCity: 'Durban',
+        destinationCountry: 'South Africa',
+        flag: '🇿🇦',
+        modes: ['SEA', 'AIR'],
+        primaryMode: 'Intra-Africa Coastal Shuttle',
+        transitTime: 'Sea: 8-10 Days · Air: 6 Hours',
+        frequency: '2x Weekly Ocean Feeders',
+        outboundCargo: 'Agricultural Commodities, Cocoa, Rubber, Wood Products',
+        inboundCargo: 'Mining Machinery, Processed Steel, Automotive Spares',
+        services: ['West-to-South Maritime Link', 'Door-to-Door Delivery']
+      },
+      {
+        destinationId: 'london-hub',
+        destinationCity: 'London',
+        destinationCountry: 'United Kingdom',
+        flag: '🇬🇧',
+        modes: ['SEA', 'AIR'],
+        primaryMode: 'West Africa-Europe Express Ocean & Air',
+        transitTime: 'Sea: 14 Days · Air: 6 Hours',
+        frequency: 'Weekly Scheduled Freighters',
+        outboundCargo: 'Agri-commodities, Cashews, Cocoa, Solid Minerals',
+        inboundCargo: 'Industrial Machinery, Pharmaceuticals, Consumer Goods',
+        services: ['UK Import Clearance', 'Fast-Track Customs']
+      }
+    ]
+  },
+  {
+    id: 'newyork-hub',
+    regionId: 'north-america',
+    country: 'United States',
+    city: 'New York',
+    flag: '🇺🇸',
+    role: 'North America East Coast Maritime Gateway & Air Logistics Hub',
+    tier: 'Regional Operations Hub',
+    isPrimary: false,
+    address: 'JFK Air Cargo Center & Port of New York and New Jersey, NY, USA',
+    phone: '+1 212 555 0190',
+    email: 'newyork@gaciscargoservices.com',
+    geo: { lat: 40.7128, lng: -74.0060 },
+    coordinates: { x: 260, y: 200 },
+    connectedSeas: ['atlantic-north'],
+    capabilities: ['JFK Air Cargo Gateway', 'Port of NY/NJ Container Logistics', 'Intermodal Rail to Midwest', 'Transatlantic Express'],
+    stats: { weeklyFlights: 'Daily Freighters', oceanTEU: 'Maher Terminals Access', warehouseSqFt: '210,000' },
+    connectedTradeLanes: [
+      {
+        destinationId: 'losangeles-hub',
+        destinationCity: 'Los Angeles',
+        destinationCountry: 'United States',
+        flag: '🇺🇸',
+        modes: ['RAIL', 'ROAD', 'AIR'],
+        primaryMode: 'US Coast-to-Coast Intermodal Rail & Air Express',
+        transitTime: 'Rail: 4-5 Days · Air: Same Day',
+        frequency: 'Daily Scheduled Transcontinental Linehauls',
+        outboundCargo: 'High-Value Electronics, Pharmaceuticals, Financial Mail, Fashion Retail',
+        inboundCargo: 'Transpacific Imports, Aerospace Parts, Produce, Tech Hardware',
+        services: ['Class-1 Double-Stack Rail', 'Expedited Team-Driver FTL', 'Same-Day Air']
+      },
+      {
+        destinationId: 'london-hub',
+        destinationCity: 'London',
+        destinationCountry: 'United Kingdom',
+        flag: '🇬🇧',
+        modes: ['AIR', 'SEA'],
+        primaryMode: 'Transatlantic Express Air & Ocean Trunk',
+        transitTime: 'Air: 6 Hours · Sea: 8-10 Days',
+        frequency: 'Multiple Daily Flights · Weekly Deepsea',
+        outboundCargo: 'Medical Diagnostics, Aerospace Spares, High-Tech Equipment',
+        inboundCargo: 'Luxury Retail, Automotive Modules, Pharmaceuticals',
+        services: ['JFK-LHR Express', 'Transatlantic FCL', 'Bonded Warehousing']
+      }
+    ]
+  },
+  {
+    id: 'losangeles-hub',
+    regionId: 'north-america',
+    country: 'United States',
+    city: 'Los Angeles',
+    flag: '🇺🇸',
+    role: 'Trans-Pacific Intermodal Gateway & West Coast Megahub',
+    tier: 'Regional Operations Hub',
+    isPrimary: false,
+    address: 'Port of Los Angeles / Long Beach & LAX Cargo Center, CA, USA',
+    phone: '+1 310 555 0180',
+    email: 'losangeles@gaciscargoservices.com',
+    geo: { lat: 33.7432, lng: -118.2673 },
+    coordinates: { x: 170, y: 220 },
+    connectedSeas: ['pacific-north'],
+    capabilities: ['POLA/POLB Megaterminal Sync', 'BNSF/UP Alameda Corridor Rail', 'Trans-Pacific Expedited', 'Cold Chain Warehousing'],
+    stats: { weeklyFlights: 'Daily Transpacific', oceanTEU: 'Pier 400 On-Dock Rail', warehouseSqFt: '260,000' },
+    connectedTradeLanes: [
+      {
+        destinationId: 'newyork-hub',
+        destinationCity: 'New York',
+        destinationCountry: 'United States',
+        flag: '🇺🇸',
+        modes: ['RAIL', 'ROAD', 'AIR'],
+        primaryMode: 'US Coast-to-Coast Intermodal Rail & Air Express',
+        transitTime: 'Rail: 4-5 Days · Air: Same Day',
+        frequency: 'Daily Scheduled Transcontinental Linehauls',
+        outboundCargo: 'Transpacific Imports, Aerospace Parts, Tech Hardware, Perishables',
+        inboundCargo: 'High-Value Electronics, Pharmaceuticals, Retail Shipments',
+        services: ['Class-1 Double-Stack Rail', 'Expedited Team-Driver FTL', 'Same-Day Air']
+      },
+      {
+        destinationId: 'tokyo-hub',
+        destinationCity: 'Tokyo',
+        destinationCountry: 'Japan',
+        flag: '🇯🇵',
+        modes: ['AIR', 'SEA'],
+        primaryMode: 'Transpacific Ocean Trunk & Express Air',
+        transitTime: 'Air: 10 Hours · Sea: 11-13 Days',
+        frequency: 'Daily Widebody Freighters · Weekly Container Lines',
+        outboundCargo: 'Aerospace Engineering, California Produce, Precision Instruments',
+        inboundCargo: 'Automotive Subassemblies, Robotics, Microelectronics',
+        services: ['LAX-HND Airfreight', 'Port of LA Gate-in', 'Customs Fast-Track']
       }
     ]
   }

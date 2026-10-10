@@ -1,8 +1,7 @@
 import { lazy, Suspense, useState, useEffect } from 'react';
-import { 
-  MapPin, Mail, Building2, Globe2, ArrowRight, Phone, Check, 
-  Activity, Plane, Ship, Train, Truck, ShieldCheck, Compass, Radio,
-  Layers, ChevronRight, Boxes, Waves, Anchor, Navigation, Zap, Search, ArrowDownLeft, ArrowUpRight
+import {
+  MapPin, Mail, Building2, Globe2, ArrowRight, Phone, Check,
+  Activity, ShieldCheck, Radio, ChevronRight, Waves, Anchor, Navigation, Search
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import SEO from '../../components/Common/SEO';
@@ -12,154 +11,319 @@ import './GlobalNetwork.css';
 
 const RealGeographicMap = lazy(() => import('../../components/NetworkMap/RealGeographicMap'));
 
-const importServicePorts = [
-  'China (All Ports)', 'Hong Kong', 'Taiwan', 'Singapore', 'Malaysia', 'Indonesia',
-  'South Korea', 'Thailand', 'Vietnam', 'Cambodia', 'Myanmar', 'Japan', 'U.K.',
-  'Italy', 'Germany', 'France', 'Belgium', 'Bulgaria', 'Netherlands', 'Switzerland',
-  'Spain', 'Austria', 'Other International Ports'
-];
-
-const exportServiceRegions = [
-  'Far East', 'South East Asia', 'Middle East', 'Indian Sub-continent', 'CIS',
-  'Red Sea', 'Africa', 'Europe', 'Canada', 'USEC', 'USWC', 'Latin America',
-  'Central America'
-];
-
 const servicePortNetwork = [
-  { id: 'CN', country: 'China', flag: '🇨🇳', scope: 'ALL MAJOR PORTS', ports: [
-    { name: 'Shanghai', code: 'CNSHA', connections: ['Chennai', 'Nhava Sheva / JNPT', 'Mundra', 'Kolkata / Haldia', 'Colombo', 'Dubai / Jebel Ali', 'Singapore', 'Port Klang', 'Rotterdam', 'Hamburg', 'Felixstowe', 'Genoa', 'Los Angeles / Long Beach', 'New York / New Jersey'] },
-    { name: 'Ningbo-Zhoushan', code: 'CNNGB', connections: ['Chennai', 'Mundra', 'Nhava Sheva / JNPT', 'Singapore', 'Port Klang', 'Colombo', 'Jebel Ali', 'Hamburg', 'Rotterdam', 'Felixstowe', 'Los Angeles / Long Beach'] },
-    { name: 'Shenzhen — Yantian / Shekou', code: 'CNSZX', connections: ['Chennai', 'Nhava Sheva / JNPT', 'Mundra', 'Colombo', 'Singapore', 'Port Klang', 'Jebel Ali', 'Hamburg', 'Rotterdam', 'Felixstowe', 'Los Angeles / Long Beach', 'New York / New Jersey'] },
-    { name: 'Qingdao', code: 'CNTAO', connections: ['Chennai', 'Nhava Sheva / JNPT', 'Singapore', 'Port Klang', 'Jebel Ali', 'Hamburg', 'Rotterdam', 'Felixstowe', 'Genoa'] },
-    { name: 'Tianjin / Xingang', code: 'CNTSN', connections: ['Chennai', 'Nhava Sheva / JNPT', 'Singapore', 'Jebel Ali', 'Hamburg', 'Rotterdam', 'Felixstowe', 'Los Angeles / Long Beach'] },
-    { name: 'Xiamen', code: 'CNXMN', connections: ['Chennai', 'Colombo', 'Singapore', 'Port Klang', 'Jebel Ali', 'Hamburg', 'Rotterdam', 'Los Angeles / Long Beach'] },
-    { name: 'Guangzhou / Nansha', code: 'CNCAN', connections: ['Chennai', 'Nhava Sheva / JNPT', 'Singapore', 'Port Klang', 'Colombo', 'Jebel Ali', 'Hamburg', 'Rotterdam', 'Felixstowe'] },
-    { name: 'Dalian', code: 'CNDLC', connections: ['Chennai', 'Singapore', 'Jebel Ali', 'Hamburg', 'Rotterdam', 'Los Angeles / Long Beach'] },
-    { name: 'Lianyungang', code: 'CNLYG', connections: ['Chennai', 'Nhava Sheva / JNPT', 'Singapore', 'Jebel Ali', 'Hamburg', 'Rotterdam'] },
-    { name: 'Rizhao', code: 'CNRZH', connections: ['Chennai', 'Singapore', 'Jebel Ali', 'Hamburg', 'Rotterdam'] }
+  // ── NORTHEAST ASIA ─────────────────────────────────────────────────────────
+  { id: 'CN', country: 'China', flag: '🇨🇳', regionId: 'northeast-asia', scope: 'ALL MAJOR PORTS', ports: [
+    { name: 'Shanghai', code: 'CNSHA', connections: ['Ningbo-Zhoushan', 'Qingdao', 'Tianjin / Xingang', 'Busan', 'Kaohsiung', 'Port of Singapore', 'Jebel Ali / Dubai', 'Hamburg', 'Rotterdam', 'Felixstowe', 'Los Angeles / Long Beach', 'New York / New Jersey'] },
+    { name: 'Ningbo-Zhoushan', code: 'CNNGB', connections: ['Shanghai', 'Qingdao', 'Busan', 'Port of Singapore', 'Jebel Ali / Dubai', 'Hamburg', 'Rotterdam', 'Los Angeles / Long Beach'] },
+    { name: 'Shenzhen — Yantian / Shekou', code: 'CNSZX', connections: ['Shanghai', 'Kwai Tsing Container Terminals', 'Port of Singapore', 'Jebel Ali / Dubai', 'Hamburg', 'Rotterdam', 'Los Angeles / Long Beach', 'New York / New Jersey'] },
+    { name: 'Qingdao', code: 'CNTAO', connections: ['Shanghai', 'Ningbo-Zhoushan', 'Busan', 'Port of Singapore', 'Jebel Ali / Dubai', 'Hamburg', 'Rotterdam'] },
+    { name: 'Tianjin / Xingang', code: 'CNTSN', connections: ['Shanghai', 'Dalian', 'Busan', 'Port of Singapore', 'Jebel Ali / Dubai', 'Hamburg', 'Rotterdam'] },
+    { name: 'Xiamen', code: 'CNXMN', connections: ['Shanghai', 'Port of Singapore', 'Jebel Ali / Dubai', 'Hamburg', 'Rotterdam'] },
+    { name: 'Guangzhou / Nansha', code: 'CNCAN', connections: ['Shanghai', 'Shenzhen — Yantian / Shekou', 'Port of Singapore', 'Jebel Ali / Dubai', 'Hamburg', 'Rotterdam'] },
+    { name: 'Dalian', code: 'CNDLC', connections: ['Shanghai', 'Tianjin / Xingang', 'Busan', 'Port of Singapore', 'Jebel Ali / Dubai'] },
+    { name: 'Lianyungang', code: 'CNLYG', connections: ['Shanghai', 'Qingdao', 'Port of Singapore', 'Jebel Ali / Dubai'] },
+    { name: 'Rizhao', code: 'CNRZH', connections: ['Qingdao', 'Shanghai', 'Tianjin / Xingang'] }
   ]},
-  { id: 'HK', country: 'Hong Kong', flag: '🇭🇰', ports: [
-    { name: 'Kwai Tsing Container Terminals', code: 'HKHKG', connections: ['Chennai', 'Nhava Sheva / JNPT', 'Mundra', 'Singapore', 'Port Klang', 'Jebel Ali', 'Colombo', 'Hamburg', 'Rotterdam', 'Felixstowe', 'Los Angeles / Long Beach'] }
+  { id: 'HK', country: 'Hong Kong', flag: '🇭🇰', regionId: 'northeast-asia', ports: [
+    { name: 'Kwai Tsing Container Terminals', code: 'HKHKG', connections: ['Shanghai', 'Shenzhen — Yantian / Shekou', 'Busan', 'Port of Singapore', 'Jebel Ali / Dubai', 'Hamburg', 'Rotterdam', 'Los Angeles / Long Beach'] }
   ]},
-  { id: 'TW', country: 'Taiwan', flag: '🇹🇼', ports: [
-    { name: 'Kaohsiung', code: 'TWKHH', connections: ['Chennai', 'Nhava Sheva / JNPT', 'Singapore', 'Port Klang', 'Jebel Ali', 'Colombo', 'Hamburg', 'Rotterdam', 'Los Angeles / Long Beach'] },
-    { name: 'Keelung', code: 'TWKEL', connections: ['Chennai', 'Singapore', 'Jebel Ali', 'Hamburg', 'Rotterdam', 'Los Angeles / Long Beach'] },
-    { name: 'Taichung', code: 'TWTXG', connections: ['Chennai', 'Singapore', 'Jebel Ali', 'Hamburg', 'Rotterdam'] }
+  { id: 'TW', country: 'Taiwan', flag: '🇹🇼', regionId: 'northeast-asia', ports: [
+    { name: 'Kaohsiung', code: 'TWKHH', connections: ['Shanghai', 'Busan', 'Port of Singapore', 'Jebel Ali / Dubai', 'Hamburg', 'Rotterdam', 'Los Angeles / Long Beach'] },
+    { name: 'Keelung', code: 'TWKEL', connections: ['Shanghai', 'Kaohsiung', 'Busan', 'Port of Singapore', 'Los Angeles / Long Beach'] },
+    { name: 'Taichung', code: 'TWTXG', connections: ['Kaohsiung', 'Port of Singapore', 'Jebel Ali / Dubai'] }
   ]},
-  { id: 'SG', country: 'Singapore', flag: '🇸🇬', ports: [
-    { name: 'Port of Singapore', code: 'SGSIN', connections: ['Chennai', 'Mundra', 'Nhava Sheva / JNPT', 'Colombo', 'Jebel Ali', 'Port Klang', 'Tanjung Pelepas', 'Jakarta / Tanjung Priok', 'Busan', 'Tokyo / Yokohama', 'Hamburg', 'Rotterdam', 'Felixstowe', 'Genoa', 'Los Angeles / Long Beach', 'New York / New Jersey'] }
+  { id: 'KR', country: 'South Korea', flag: '🇰🇷', regionId: 'northeast-asia', ports: [
+    { name: 'Busan', code: 'KRPUS', connections: ['Shanghai', 'Ningbo-Zhoushan', 'Kaohsiung', 'Port of Singapore', 'Jebel Ali / Dubai', 'Hamburg', 'Rotterdam', 'Los Angeles / Long Beach', 'New York / New Jersey'] },
+    { name: 'Incheon', code: 'KRINC', connections: ['Busan', 'Shanghai', 'Jebel Ali / Dubai', 'Los Angeles / Long Beach'] },
+    { name: 'Gwangyang', code: 'KRKUV', connections: ['Busan', 'Shanghai', 'Jebel Ali / Dubai', 'Los Angeles / Long Beach'] },
+    { name: 'Pyeongtaek-Dangjin', code: 'KRPTK', connections: ['Busan', 'Shanghai', 'Jebel Ali / Dubai'] }
   ]},
-  { id: 'MY', country: 'Malaysia', flag: '🇲🇾', ports: [
-    { name: 'Port Klang', code: 'MYPKG', connections: ['Chennai', 'Nhava Sheva / JNPT', 'Mundra', 'Singapore', 'Tanjung Pelepas', 'Jebel Ali', 'Colombo', 'Hamburg', 'Rotterdam', 'Felixstowe', 'Genoa', 'Los Angeles / Long Beach'] },
-    { name: 'Tanjung Pelepas', code: 'MYTPP', connections: ['Chennai', 'Singapore', 'Nhava Sheva / JNPT', 'Jebel Ali', 'Colombo', 'Busan', 'Tokyo / Yokohama', 'Hamburg', 'Rotterdam', 'Felixstowe', 'Los Angeles / Long Beach'] },
-    { name: 'Penang', code: 'MYPEN', connections: ['Chennai', 'Singapore', 'Port Klang', 'Jebel Ali', 'Colombo', 'Hamburg', 'Rotterdam'] },
-    { name: 'Johor Port', code: 'MYJHB', connections: ['Singapore', 'Chennai', 'Port Klang', 'Jebel Ali', 'Colombo'] },
-    { name: 'Kuantan', code: 'MYKUA', connections: ['Singapore', 'Port Klang', 'Chennai', 'Jebel Ali'] }
+  { id: 'JP', country: 'Japan', flag: '🇯🇵', regionId: 'northeast-asia', ports: [
+    { name: 'Tokyo', code: 'JPTYO', connections: ['Yokohama', 'Busan', 'Shanghai', 'Port of Singapore', 'Jebel Ali / Dubai', 'Hamburg', 'Rotterdam', 'Los Angeles / Long Beach', 'New York / New Jersey'] },
+    { name: 'Yokohama', code: 'JPYOK', connections: ['Tokyo', 'Busan', 'Shanghai', 'Port of Singapore', 'Jebel Ali / Dubai', 'Hamburg', 'Los Angeles / Long Beach'] },
+    { name: 'Nagoya', code: 'JPNGO', connections: ['Tokyo', 'Busan', 'Shanghai', 'Jebel Ali / Dubai', 'Los Angeles / Long Beach'] },
+    { name: 'Kobe', code: 'JPUKB', connections: ['Osaka', 'Busan', 'Shanghai', 'Jebel Ali / Dubai', 'Los Angeles / Long Beach'] },
+    { name: 'Osaka', code: 'JPOSA', connections: ['Kobe', 'Busan', 'Shanghai', 'Jebel Ali / Dubai'] },
+    { name: 'Hakata / Fukuoka', code: 'JPFUK', connections: ['Busan', 'Shanghai', 'Kobe'] }
   ]},
-  { id: 'ID', country: 'Indonesia', flag: '🇮🇩', ports: [
-    { name: 'Tanjung Priok / Jakarta', code: 'IDTPP', connections: ['Chennai', 'Singapore', 'Port Klang', 'Jebel Ali', 'Colombo', 'Busan', 'Shanghai', 'Hamburg', 'Rotterdam', 'Los Angeles / Long Beach'] },
-    { name: 'Tanjung Perak / Surabaya', code: 'IDSUB', connections: ['Singapore', 'Port Klang', 'Chennai', 'Jebel Ali', 'Colombo', 'Shanghai'] },
-    { name: 'Belawan / Medan', code: 'IDBLW', connections: ['Singapore', 'Port Klang', 'Chennai', 'Jebel Ali', 'Colombo'] },
-    { name: 'Tanjung Emas / Semarang', code: 'IDSRG', connections: ['Singapore', 'Port Klang', 'Chennai', 'Jebel Ali', 'Colombo'] },
-    { name: 'Makassar', code: 'IDUPG', connections: ['Singapore', 'Surabaya', 'Jakarta / Tanjung Priok', 'Port Klang'] }
+  // ── SOUTHEAST ASIA ──────────────────────────────────────────────────────────
+  { id: 'SG', country: 'Singapore', flag: '🇸🇬', regionId: 'southeast-asia', ports: [
+    { name: 'Port of Singapore', code: 'SGSIN', connections: ['Port Klang', 'Tanjung Pelepas', 'Tanjung Priok / Jakarta', 'Laem Chabang', 'Cai Mep-Thi Vai', 'Busan', 'Shanghai', 'Jebel Ali / Dubai', 'Hamburg', 'Rotterdam', 'Felixstowe', 'Los Angeles / Long Beach', 'New York / New Jersey'] }
   ]},
-  { id: 'KR', country: 'South Korea', flag: '🇰🇷', ports: [
-    { name: 'Busan', code: 'KRPUS', connections: ['Chennai', 'Nhava Sheva / JNPT', 'Mundra', 'Singapore', 'Port Klang', 'Shanghai', 'Jebel Ali', 'Hamburg', 'Rotterdam', 'Felixstowe', 'Los Angeles / Long Beach', 'New York / New Jersey'] },
-    { name: 'Incheon', code: 'KRINC', connections: ['Chennai', 'Singapore', 'Shanghai', 'Jebel Ali', 'Hamburg', 'Rotterdam', 'Los Angeles / Long Beach'] },
-    { name: 'Gwangyang', code: 'KRKUV', connections: ['Chennai', 'Singapore', 'Shanghai', 'Jebel Ali', 'Hamburg', 'Rotterdam', 'Los Angeles / Long Beach'] },
-    { name: 'Pyeongtaek-Dangjin', code: 'KRPTK', connections: ['Chennai', 'Shanghai', 'Singapore', 'Jebel Ali', 'Hamburg'] }
+  { id: 'MY', country: 'Malaysia', flag: '🇲🇾', regionId: 'southeast-asia', ports: [
+    { name: 'Port Klang', code: 'MYPKG', connections: ['Port of Singapore', 'Tanjung Pelepas', 'Tanjung Priok / Jakarta', 'Jebel Ali / Dubai', 'Hamburg', 'Rotterdam', 'Los Angeles / Long Beach'] },
+    { name: 'Tanjung Pelepas', code: 'MYTPP', connections: ['Port of Singapore', 'Port Klang', 'Busan', 'Jebel Ali / Dubai', 'Hamburg', 'Rotterdam', 'Los Angeles / Long Beach'] },
+    { name: 'Penang', code: 'MYPEN', connections: ['Port of Singapore', 'Port Klang', 'Jebel Ali / Dubai'] },
+    { name: 'Johor Port', code: 'MYJHB', connections: ['Port of Singapore', 'Port Klang'] },
+    { name: 'Kuantan', code: 'MYKUA', connections: ['Port of Singapore', 'Port Klang'] }
   ]},
-  { id: 'TH', country: 'Thailand', flag: '🇹🇭', ports: [
-    { name: 'Laem Chabang', code: 'THLCH', connections: ['Chennai', 'Singapore', 'Port Klang', 'Jebel Ali', 'Colombo', 'Shanghai', 'Hamburg', 'Rotterdam', 'Los Angeles / Long Beach'] },
-    { name: 'Bangkok Port', code: 'THBKK', connections: ['Chennai', 'Singapore', 'Port Klang', 'Jebel Ali', 'Colombo'] },
-    { name: 'Map Ta Phut', code: 'THMTP', connections: ['Chennai', 'Singapore', 'Jebel Ali', 'Port Klang'] },
-    { name: 'Songkhla', code: 'THSGZ', connections: ['Singapore', 'Port Klang', 'Chennai'] }
+  { id: 'ID', country: 'Indonesia', flag: '🇮🇩', regionId: 'southeast-asia', ports: [
+    { name: 'Tanjung Priok / Jakarta', code: 'IDTPP', connections: ['Port of Singapore', 'Port Klang', 'Tanjung Perak / Surabaya', 'Busan', 'Shanghai', 'Jebel Ali / Dubai', 'Hamburg', 'Rotterdam'] },
+    { name: 'Tanjung Perak / Surabaya', code: 'IDSUB', connections: ['Tanjung Priok / Jakarta', 'Port of Singapore', 'Port Klang', 'Jebel Ali / Dubai'] },
+    { name: 'Belawan / Medan', code: 'IDBLW', connections: ['Port of Singapore', 'Port Klang', 'Jebel Ali / Dubai'] },
+    { name: 'Tanjung Emas / Semarang', code: 'IDSRG', connections: ['Tanjung Priok / Jakarta', 'Port of Singapore', 'Port Klang'] },
+    { name: 'Makassar', code: 'IDUPG', connections: ['Tanjung Priok / Jakarta', 'Tanjung Perak / Surabaya', 'Port of Singapore'] }
   ]},
-  { id: 'VN', country: 'Vietnam', flag: '🇻🇳', ports: [
-    { name: 'Cai Mep-Thi Vai', code: 'VNCMT', connections: ['Chennai', 'Singapore', 'Port Klang', 'Jebel Ali', 'Colombo', 'Shanghai', 'Busan', 'Hamburg', 'Rotterdam', 'Los Angeles / Long Beach'] },
-    { name: 'Cat Lai / Ho Chi Minh City', code: 'VNSGN', connections: ['Chennai', 'Singapore', 'Port Klang', 'Jebel Ali', 'Colombo', 'Shanghai'] },
-    { name: 'Hai Phong', code: 'VNHPH', connections: ['Chennai', 'Singapore', 'Shanghai', 'Busan', 'Jebel Ali', 'Hamburg', 'Rotterdam'] },
-    { name: 'Da Nang', code: 'VNDAD', connections: ['Singapore', 'Port Klang', 'Chennai', 'Shanghai'] }
+  { id: 'TH', country: 'Thailand', flag: '🇹🇭', regionId: 'southeast-asia', ports: [
+    { name: 'Laem Chabang', code: 'THLCH', connections: ['Port of Singapore', 'Port Klang', 'Cai Mep-Thi Vai', 'Shanghai', 'Jebel Ali / Dubai', 'Hamburg', 'Los Angeles / Long Beach'] },
+    { name: 'Bangkok Port', code: 'THBKK', connections: ['Laem Chabang', 'Port of Singapore', 'Port Klang'] },
+    { name: 'Map Ta Phut', code: 'THMTP', connections: ['Laem Chabang', 'Port of Singapore'] },
+    { name: 'Songkhla', code: 'THSGZ', connections: ['Port of Singapore', 'Port Klang'] }
   ]},
-  { id: 'KH', country: 'Cambodia', flag: '🇰🇭', ports: [
-    { name: 'Sihanoukville Autonomous Port', code: 'KHKOS', connections: ['Singapore', 'Port Klang', 'Chennai', 'Jebel Ali', 'Colombo', 'Shanghai'] },
-    { name: 'Phnom Penh Autonomous Port', code: 'KHPPH', connections: ['Sihanoukville', 'Singapore', 'Port Klang', 'Chennai'] }
+  { id: 'VN', country: 'Vietnam', flag: '🇻🇳', regionId: 'southeast-asia', ports: [
+    { name: 'Cai Mep-Thi Vai', code: 'VNCMT', connections: ['Port of Singapore', 'Port Klang', 'Hai Phong', 'Busan', 'Shanghai', 'Jebel Ali / Dubai', 'Hamburg', 'Rotterdam', 'Los Angeles / Long Beach'] },
+    { name: 'Cat Lai / Ho Chi Minh City', code: 'VNSGN', connections: ['Cai Mep-Thi Vai', 'Port of Singapore', 'Port Klang', 'Shanghai'] },
+    { name: 'Hai Phong', code: 'VNHPH', connections: ['Cai Mep-Thi Vai', 'Port of Singapore', 'Shanghai', 'Busan', 'Jebel Ali / Dubai'] },
+    { name: 'Da Nang', code: 'VNDAD', connections: ['Cai Mep-Thi Vai', 'Port of Singapore', 'Port Klang'] }
   ]},
-  { id: 'MM', country: 'Myanmar', flag: '🇲🇲', ports: [
-    { name: 'Yangon / Thilawa', code: 'MMRGN', connections: ['Singapore', 'Port Klang', 'Chennai', 'Jebel Ali', 'Colombo', 'Port Klang'] },
-    { name: 'Kyaukphyu', code: 'MMKYP', connections: ['Chittagong', 'Singapore', 'Colombo', 'Chennai'] }
+  { id: 'KH', country: 'Cambodia', flag: '🇰🇭', regionId: 'southeast-asia', ports: [
+    { name: 'Sihanoukville Autonomous Port', code: 'KHKOS', connections: ['Port of Singapore', 'Port Klang', 'Jebel Ali / Dubai', 'Shanghai'] },
+    { name: 'Phnom Penh Autonomous Port', code: 'KHPPH', connections: ['Sihanoukville Autonomous Port', 'Port of Singapore', 'Port Klang'] }
   ]},
-  { id: 'JP', country: 'Japan', flag: '🇯🇵', ports: [
-    { name: 'Tokyo', code: 'JPTYO', connections: ['Chennai', 'Singapore', 'Port Klang', 'Jebel Ali', 'Shanghai', 'Busan', 'Hamburg', 'Rotterdam', 'Los Angeles / Long Beach', 'New York / New Jersey'] },
-    { name: 'Yokohama', code: 'JPYOK', connections: ['Chennai', 'Singapore', 'Port Klang', 'Shanghai', 'Busan', 'Jebel Ali', 'Hamburg', 'Rotterdam', 'Los Angeles / Long Beach'] },
-    { name: 'Nagoya', code: 'JPNGO', connections: ['Chennai', 'Singapore', 'Shanghai', 'Busan', 'Jebel Ali', 'Hamburg', 'Rotterdam', 'Los Angeles / Long Beach'] },
-    { name: 'Kobe', code: 'JPUKB', connections: ['Chennai', 'Singapore', 'Shanghai', 'Busan', 'Jebel Ali', 'Hamburg', 'Rotterdam', 'Los Angeles / Long Beach'] },
-    { name: 'Osaka', code: 'JPOSA', connections: ['Chennai', 'Singapore', 'Shanghai', 'Busan', 'Jebel Ali', 'Hamburg', 'Rotterdam'] },
-    { name: 'Hakata / Fukuoka', code: 'JPFUK', connections: ['Singapore', 'Busan', 'Shanghai', 'Chennai'] }
+  { id: 'MM', country: 'Myanmar', flag: '🇲🇲', regionId: 'southeast-asia', ports: [
+    { name: 'Yangon / Thilawa', code: 'MMRGN', connections: ['Port of Singapore', 'Port Klang', 'Jebel Ali / Dubai'] },
+    { name: 'Kyaukphyu', code: 'MMKYP', connections: ['Port of Singapore', 'Colombo'] }
   ]},
-  { id: 'GB', country: 'United Kingdom', flag: '🇬🇧', ports: [
-    { name: 'Felixstowe', code: 'GBFXT', connections: ['Chennai', 'Mundra', 'Nhava Sheva / JNPT', 'Singapore', 'Shanghai', 'Ningbo-Zhoushan', 'Jebel Ali', 'Rotterdam', 'Hamburg', 'Genoa', 'New York / New Jersey', 'Los Angeles / Long Beach'] },
-    { name: 'Southampton', code: 'GBSOU', connections: ['Chennai', 'Mundra', 'Singapore', 'Jebel Ali', 'Colombo', 'Rotterdam', 'Hamburg', 'Genoa', 'New York / New Jersey'] },
-    { name: 'London Gateway', code: 'GBLON', connections: ['Chennai', 'Nhava Sheva / JNPT', 'Singapore', 'Jebel Ali', 'Rotterdam', 'Hamburg', 'New York / New Jersey'] },
-    { name: 'Liverpool', code: 'GBLIV', connections: ['Chennai', 'Singapore', 'Jebel Ali', 'Rotterdam', 'Hamburg', 'New York / New Jersey'] }
+  { id: 'PH', country: 'Philippines', flag: '🇵🇭', regionId: 'southeast-asia', ports: [
+    { name: 'Manila North Harbour', code: 'PHMNL', connections: ['Port of Singapore', 'Busan', 'Shanghai', 'Port Klang', 'Jebel Ali / Dubai'] },
+    { name: 'Batangas', code: 'PHBAT', connections: ['Manila North Harbour', 'Port of Singapore', 'Shanghai'] },
+    { name: 'Subic Bay', code: 'PHSBB', connections: ['Manila North Harbour', 'Port of Singapore', 'Busan'] }
   ]},
-  { id: 'IT', country: 'Italy', flag: '🇮🇹', ports: [
-    { name: 'Gioia Tauro', code: 'ITGIT', connections: ['Chennai', 'Mundra', 'Nhava Sheva / JNPT', 'Jebel Ali', 'Singapore', 'Colombo', 'Felixstowe', 'Rotterdam', 'Hamburg', 'New York / New Jersey'] },
-    { name: 'Genoa', code: 'ITGOA', connections: ['Chennai', 'Mundra', 'Nhava Sheva / JNPT', 'Jebel Ali', 'Singapore', 'Colombo', 'Hamburg', 'Rotterdam', 'Felixstowe', 'New York / New Jersey'] },
-    { name: 'La Spezia', code: 'ITSPE', connections: ['Chennai', 'Mundra', 'Jebel Ali', 'Singapore', 'Rotterdam', 'Hamburg', 'Felixstowe'] },
-    { name: 'Trieste', code: 'ITTRS', connections: ['Nhava Sheva / JNPT', 'Mundra', 'Jebel Ali', 'Singapore', 'Hamburg', 'Rotterdam'] },
-    { name: 'Livorno', code: 'ITLIV', connections: ['Chennai', 'Mundra', 'Jebel Ali', 'Singapore', 'Genoa', 'Rotterdam'] }
+  // ── EUROPE ──────────────────────────────────────────────────────────────────
+  { id: 'GB', country: 'United Kingdom', flag: '🇬🇧', regionId: 'europe', ports: [
+    { name: 'Felixstowe', code: 'GBFXT', connections: ['Rotterdam', 'Hamburg', 'Antwerp-Bruges', 'Genoa', 'New York / New Jersey', 'Los Angeles / Long Beach'] },
+    { name: 'Southampton', code: 'GBSOU', connections: ['Felixstowe', 'Rotterdam', 'Hamburg', 'Genoa', 'New York / New Jersey'] },
+    { name: 'London Gateway', code: 'GBLON', connections: ['Felixstowe', 'Rotterdam', 'Hamburg', 'New York / New Jersey'] },
+    { name: 'Liverpool', code: 'GBLIV', connections: ['Felixstowe', 'Rotterdam', 'Hamburg', 'New York / New Jersey'] }
   ]},
-  { id: 'DE', country: 'Germany', flag: '🇩🇪', ports: [
-    { name: 'Hamburg', code: 'DEHAM', connections: ['Chennai', 'Mundra', 'Nhava Sheva / JNPT', 'Singapore', 'Shanghai', 'Ningbo-Zhoushan', 'Jebel Ali', 'Rotterdam', 'Felixstowe', 'Genoa', 'New York / New Jersey', 'Los Angeles / Long Beach'] },
-    { name: 'Bremerhaven', code: 'DEBRV', connections: ['Chennai', 'Mundra', 'Singapore', 'Shanghai', 'Jebel Ali', 'Rotterdam', 'Felixstowe', 'New York / New Jersey'] },
-    { name: 'Wilhelmshaven', code: 'DEWVN', connections: ['Chennai', 'Mundra', 'Singapore', 'Shanghai', 'Jebel Ali', 'Rotterdam', 'Felixstowe'] }
+  { id: 'IT', country: 'Italy', flag: '🇮🇹', regionId: 'europe', ports: [
+    { name: 'Gioia Tauro', code: 'ITGIT', connections: ['Genoa', 'Felixstowe', 'Rotterdam', 'Hamburg', 'Valencia', 'Algeciras'] },
+    { name: 'Genoa', code: 'ITGOA', connections: ['Gioia Tauro', 'La Spezia', 'Livorno', 'Hamburg', 'Rotterdam', 'Felixstowe'] },
+    { name: 'La Spezia', code: 'ITSPE', connections: ['Genoa', 'Livorno', 'Rotterdam', 'Hamburg'] },
+    { name: 'Trieste', code: 'ITTRS', connections: ['Genoa', 'Hamburg', 'Rotterdam', 'Vienna Danube Port'] },
+    { name: 'Livorno', code: 'ITLIV', connections: ['Genoa', 'La Spezia', 'Rotterdam'] }
   ]},
-  { id: 'FR', country: 'France', flag: '🇫🇷', ports: [
-    { name: 'Le Havre', code: 'FRLEH', connections: ['Chennai', 'Mundra', 'Nhava Sheva / JNPT', 'Singapore', 'Shanghai', 'Jebel Ali', 'Rotterdam', 'Hamburg', 'Felixstowe', 'New York / New Jersey'] },
-    { name: 'Marseille Fos', code: 'FRMRS', connections: ['Chennai', 'Mundra', 'Nhava Sheva / JNPT', 'Jebel Ali', 'Singapore', 'Colombo', 'Genoa', 'Rotterdam', 'Hamburg'] },
-    { name: 'Dunkirk', code: 'FRDKK', connections: ['Chennai', 'Mundra', 'Singapore', 'Jebel Ali', 'Rotterdam', 'Hamburg', 'Felixstowe'] },
-    { name: 'Nantes-Saint-Nazaire', code: 'FRNTE', connections: ['Chennai', 'Singapore', 'Jebel Ali', 'Rotterdam', 'Hamburg'] }
+  { id: 'DE', country: 'Germany', flag: '🇩🇪', regionId: 'europe', ports: [
+    { name: 'Hamburg', code: 'DEHAM', connections: ['Bremerhaven', 'Rotterdam', 'Antwerp-Bruges', 'Felixstowe', 'Genoa', 'New York / New Jersey', 'Los Angeles / Long Beach'] },
+    { name: 'Bremerhaven', code: 'DEBRV', connections: ['Hamburg', 'Rotterdam', 'Felixstowe', 'New York / New Jersey'] },
+    { name: 'Wilhelmshaven', code: 'DEWVN', connections: ['Hamburg', 'Rotterdam', 'Felixstowe'] }
   ]},
-  { id: 'BE', country: 'Belgium', flag: '🇧🇪', ports: [
-    { name: 'Antwerp-Bruges', code: 'BEANR', connections: ['Chennai', 'Mundra', 'Nhava Sheva / JNPT', 'Singapore', 'Shanghai', 'Jebel Ali', 'Rotterdam', 'Hamburg', 'Felixstowe', 'Genoa', 'New York / New Jersey'] }
+  { id: 'FR', country: 'France', flag: '🇫🇷', regionId: 'europe', ports: [
+    { name: 'Le Havre', code: 'FRLEH', connections: ['Rotterdam', 'Hamburg', 'Felixstowe', 'Antwerp-Bruges', 'New York / New Jersey'] },
+    { name: 'Marseille Fos', code: 'FRMRS', connections: ['Genoa', 'Gioia Tauro', 'Rotterdam', 'Hamburg', 'Algeciras'] },
+    { name: 'Dunkirk', code: 'FRDKK', connections: ['Le Havre', 'Rotterdam', 'Hamburg', 'Felixstowe'] },
+    { name: 'Nantes-Saint-Nazaire', code: 'FRNTE', connections: ['Le Havre', 'Rotterdam', 'Hamburg'] }
   ]},
-  { id: 'BG', country: 'Bulgaria', flag: '🇧🇬', ports: [
-    { name: 'Port of Varna', code: 'BGVAR', connections: ['Jebel Ali', 'Mundra', 'Nhava Sheva / JNPT', 'Singapore', 'Piraeus', 'Constanta', 'Genoa', 'Hamburg', 'Rotterdam'] },
-    { name: 'Port of Burgas', code: 'BGBOJ', connections: ['Jebel Ali', 'Mundra', 'Nhava Sheva / JNPT', 'Singapore', 'Piraeus', 'Genoa', 'Hamburg'] }
+  { id: 'BE', country: 'Belgium', flag: '🇧🇪', regionId: 'europe', ports: [
+    { name: 'Antwerp-Bruges', code: 'BEANR', connections: ['Rotterdam', 'Hamburg', 'Felixstowe', 'Genoa', 'New York / New Jersey'] }
   ]},
-  { id: 'NL', country: 'Netherlands', flag: '🇳🇱', ports: [
-    { name: 'Rotterdam', code: 'NLRTM', connections: ['Chennai', 'Mundra', 'Nhava Sheva / JNPT', 'Singapore', 'Shanghai', 'Ningbo-Zhoushan', 'Jebel Ali', 'Hamburg', 'Felixstowe', 'Genoa', 'New York / New Jersey', 'Los Angeles / Long Beach'] },
-    { name: 'Amsterdam', code: 'NLAMS', connections: ['Chennai', 'Mundra', 'Singapore', 'Jebel Ali', 'Hamburg', 'Felixstowe'] }
+  { id: 'BG', country: 'Bulgaria', flag: '🇧🇬', regionId: 'europe', ports: [
+    { name: 'Port of Varna', code: 'BGVAR', connections: ['Constanta', 'Piraeus', 'Genoa', 'Hamburg', 'Rotterdam'] },
+    { name: 'Port of Burgas', code: 'BGBOJ', connections: ['Port of Varna', 'Constanta', 'Piraeus', 'Genoa'] }
   ]},
-  { id: 'CH', country: 'Switzerland', flag: '🇨🇭', ports: [
-    { name: 'Basel Rhine Ports', code: 'CHBSL', connections: ['Rotterdam', 'Antwerp-Bruges', 'Hamburg', 'Genoa', 'La Spezia', 'Le Havre', 'Chennai', 'Mundra', 'Nhava Sheva / JNPT'] }
+  { id: 'NL', country: 'Netherlands', flag: '🇳🇱', regionId: 'europe', ports: [
+    { name: 'Rotterdam', code: 'NLRTM', connections: ['Antwerp-Bruges', 'Hamburg', 'Felixstowe', 'Genoa', 'New York / New Jersey', 'Los Angeles / Long Beach'] },
+    { name: 'Amsterdam', code: 'NLAMS', connections: ['Rotterdam', 'Hamburg', 'Felixstowe'] }
   ]},
-  { id: 'ES', country: 'Spain', flag: '🇪🇸', ports: [
-    { name: 'Valencia', code: 'ESVLC', connections: ['Chennai', 'Mundra', 'Nhava Sheva / JNPT', 'Singapore', 'Jebel Ali', 'Colombo', 'Rotterdam', 'Hamburg', 'Felixstowe', 'Genoa', 'New York / New Jersey'] },
-    { name: 'Barcelona', code: 'ESBCN', connections: ['Chennai', 'Mundra', 'Jebel Ali', 'Singapore', 'Colombo', 'Genoa', 'Rotterdam', 'Hamburg'] },
-    { name: 'Algeciras', code: 'ESALG', connections: ['Chennai', 'Mundra', 'Nhava Sheva / JNPT', 'Jebel Ali', 'Singapore', 'Colombo', 'Felixstowe', 'Rotterdam', 'Genoa'] }
+  { id: 'CH', country: 'Switzerland', flag: '🇨🇭', regionId: 'europe', ports: [
+    { name: 'Basel Rhine Ports', code: 'CHBSL', connections: ['Rotterdam', 'Antwerp-Bruges', 'Hamburg', 'Genoa', 'La Spezia'] }
   ]},
-  { id: 'AT', country: 'Austria', flag: '🇦🇹', ports: [
-    { name: 'Vienna Danube Port', code: 'ATVIE', connections: ['Hamburg', 'Rotterdam', 'Antwerp-Bruges', 'Constanta', 'Genoa', 'Trieste', 'Chennai', 'Mundra', 'Nhava Sheva / JNPT'] }
+  { id: 'ES', country: 'Spain', flag: '🇪🇸', regionId: 'europe', ports: [
+    { name: 'Valencia', code: 'ESVLC', connections: ['Algeciras', 'Barcelona', 'Rotterdam', 'Hamburg', 'Felixstowe', 'Genoa', 'New York / New Jersey'] },
+    { name: 'Barcelona', code: 'ESBCN', connections: ['Valencia', 'Algeciras', 'Genoa', 'Rotterdam', 'Hamburg'] },
+    { name: 'Algeciras', code: 'ESALG', connections: ['Valencia', 'Barcelona', 'Felixstowe', 'Rotterdam', 'Genoa'] }
   ]},
-  { id: 'AE', country: 'United Arab Emirates', flag: '🇦🇪', ports: [
-    { name: 'Jebel Ali / Dubai', code: 'AEJEA', connections: ['Chennai', 'Mundra', 'Nhava Sheva / JNPT', 'Kandla', 'Colombo', 'Singapore', 'Port Klang', 'Shanghai', 'Ningbo-Zhoushan', 'Busan', 'Hamburg', 'Rotterdam', 'Felixstowe', 'Genoa', 'Mombasa', 'Durban', 'New York / New Jersey', 'Los Angeles / Long Beach'] },
-    { name: 'Khalifa Port / Abu Dhabi', code: 'AEKHL', connections: ['Chennai', 'Mundra', 'Nhava Sheva / JNPT', 'Singapore', 'Jebel Ali', 'Hamburg', 'Rotterdam', 'Mombasa'] },
-    { name: 'Khor Fakkan', code: 'AEKLF', connections: ['Chennai', 'Mundra', 'Singapore', 'Jebel Ali', 'Colombo', 'Hamburg', 'Rotterdam'] }
+  { id: 'AT', country: 'Austria', flag: '🇦🇹', regionId: 'europe', ports: [
+    { name: 'Vienna Danube Port', code: 'ATVIE', connections: ['Hamburg', 'Rotterdam', 'Antwerp-Bruges', 'Constanta', 'Genoa', 'Trieste'] }
   ]},
-  { id: 'IN', country: 'India', flag: '🇮🇳', ports: [
-    { name: 'Chennai', code: 'INMAA', connections: ['Shanghai', 'Ningbo-Zhoushan', 'Shenzhen / Yantian', 'Hong Kong', 'Kaohsiung', 'Singapore', 'Port Klang', 'Tanjung Pelepas', 'Busan', 'Laem Chabang', 'Cai Mep-Thi Vai', 'Tokyo / Yokohama', 'Jebel Ali', 'Colombo', 'Felixstowe', 'Hamburg', 'Rotterdam', 'Genoa', 'Antwerp-Bruges', 'New York / New Jersey', 'Los Angeles / Long Beach'] },
-    { name: 'Nhava Sheva / JNPT', code: 'INNSA', connections: ['Shanghai', 'Ningbo-Zhoushan', 'Shenzhen / Yantian', 'Hong Kong', 'Kaohsiung', 'Singapore', 'Port Klang', 'Busan', 'Tokyo / Yokohama', 'Jebel Ali', 'Colombo', 'Felixstowe', 'Hamburg', 'Rotterdam', 'Genoa', 'Antwerp-Bruges', 'New York / New Jersey', 'Los Angeles / Long Beach'] },
-    { name: 'Mundra', code: 'INMUN', connections: ['Shanghai', 'Ningbo-Zhoushan', 'Shenzhen / Yantian', 'Singapore', 'Port Klang', 'Busan', 'Jebel Ali', 'Colombo', 'Felixstowe', 'Hamburg', 'Rotterdam', 'Genoa', 'New York / New Jersey', 'Los Angeles / Long Beach'] },
-    { name: 'Kolkata / Haldia', code: 'INCCU', connections: ['Shanghai', 'Singapore', 'Port Klang', 'Jebel Ali', 'Colombo', 'Hamburg', 'Rotterdam'] },
-    { name: 'Cochin / Kochi', code: 'INCOK', connections: ['Singapore', 'Port Klang', 'Jebel Ali', 'Colombo', 'Hamburg', 'Rotterdam'] },
-    { name: 'Visakhapatnam', code: 'INVTZ', connections: ['Singapore', 'Port Klang', 'Jebel Ali', 'Colombo', 'Shanghai'] }
+  { id: 'PL', country: 'Poland', flag: '🇵🇱', regionId: 'europe', ports: [
+    { name: 'Port of Gdansk', code: 'PLGDN', connections: ['Hamburg', 'Rotterdam', 'Felixstowe', 'Antwerp-Bruges'] },
+    { name: 'Port of Gdynia', code: 'PLGDY', connections: ['Port of Gdansk', 'Hamburg', 'Rotterdam'] }
+  ]},
+  { id: 'GR', country: 'Greece', flag: '🇬🇷', regionId: 'europe', ports: [
+    { name: 'Piraeus', code: 'GRPIR', connections: ['Genoa', 'Gioia Tauro', 'Valencia', 'Rotterdam', 'Hamburg', 'Port of Varna', 'Constanta'] },
+    { name: 'Thessaloniki', code: 'GRTHS', connections: ['Piraeus', 'Constanta', 'Genoa', 'Hamburg'] }
+  ]},
+  { id: 'RO', country: 'Romania', flag: '🇷🇴', regionId: 'europe', ports: [
+    { name: 'Constanta', code: 'ROCOS', connections: ['Port of Varna', 'Port of Burgas', 'Piraeus', 'Genoa', 'Hamburg'] }
+  ]},
+  { id: 'PT', country: 'Portugal', flag: '🇵🇹', regionId: 'europe', ports: [
+    { name: 'Sines', code: 'PTSIN', connections: ['Algeciras', 'Rotterdam', 'Hamburg', 'Felixstowe'] },
+    { name: 'Leixões', code: 'PTOPO', connections: ['Sines', 'Algeciras', 'Rotterdam'] }
+  ]},
+  { id: 'SE', country: 'Sweden', flag: '🇸🇪', regionId: 'europe', ports: [
+    { name: 'Gothenburg', code: 'SEGOT', connections: ['Hamburg', 'Rotterdam', 'Felixstowe'] }
+  ]},
+  { id: 'FI', country: 'Finland', flag: '🇫🇮', regionId: 'europe', ports: [
+    { name: 'Helsinki', code: 'FIHEL', connections: ['Gothenburg', 'Hamburg', 'Rotterdam'] },
+    { name: 'HaminaKotka', code: 'FIHMK', connections: ['Helsinki', 'Hamburg', 'Rotterdam'] }
+  ]},
+  { id: 'DK', country: 'Denmark', flag: '🇩🇰', regionId: 'europe', ports: [
+    { name: 'Copenhagen / Malmö', code: 'DKCPH', connections: ['Hamburg', 'Rotterdam', 'Gothenburg', 'Felixstowe'] }
+  ]},
+  // ── MIDDLE EAST ─────────────────────────────────────────────────────────────
+  { id: 'AE', country: 'United Arab Emirates', flag: '🇦🇪', regionId: 'middle-east', ports: [
+    { name: 'Jebel Ali / Dubai', code: 'AEJEA', connections: ['Khalifa Port / Abu Dhabi', 'Khor Fakkan', 'Salalah Port', 'Hamad Port', 'Chennai', 'Nhava Sheva / JNPT', 'Port of Singapore', 'Shanghai', 'Busan', 'Hamburg', 'Rotterdam', 'Felixstowe', 'Mombasa', 'Los Angeles / Long Beach', 'New York / New Jersey'] },
+    { name: 'Khalifa Port / Abu Dhabi', code: 'AEKHL', connections: ['Jebel Ali / Dubai', 'Khor Fakkan', 'Chennai', 'Port of Singapore', 'Hamburg', 'Rotterdam'] },
+    { name: 'Khor Fakkan', code: 'AEKLF', connections: ['Jebel Ali / Dubai', 'Khalifa Port / Abu Dhabi', 'Salalah Port', 'Chennai', 'Port of Singapore'] }
+  ]},
+  { id: 'SA', country: 'Saudi Arabia', flag: '🇸🇦', regionId: 'middle-east', ports: [
+    { name: 'Jeddah Islamic Port', code: 'SAJED', connections: ['Jebel Ali / Dubai', 'Salalah Port', 'Djibouti Port', 'Chennai', 'Rotterdam', 'Hamburg'] },
+    { name: 'King Abdulaziz Port / Dammam', code: 'SADMM', connections: ['Jebel Ali / Dubai', 'Jeddah Islamic Port', 'Hamad Port', 'Port of Singapore', 'Hamburg'] },
+    { name: 'Jubail Commercial Port', code: 'SAJUB', connections: ['Jebel Ali / Dubai', 'Jeddah Islamic Port', 'King Abdulaziz Port / Dammam'] }
+  ]},
+  { id: 'OM', country: 'Oman', flag: '🇴🇲', regionId: 'middle-east', ports: [
+    { name: 'Salalah Port', code: 'OMSLL', connections: ['Jebel Ali / Dubai', 'Jeddah Islamic Port', 'Khor Fakkan', 'Port of Singapore', 'Chennai', 'Hamburg', 'Rotterdam'] },
+    { name: 'Sohar Port', code: 'OMSOH', connections: ['Jebel Ali / Dubai', 'Salalah Port', 'Khor Fakkan'] }
+  ]},
+  { id: 'QA', country: 'Qatar', flag: '🇶🇦', regionId: 'middle-east', ports: [
+    { name: 'Hamad Port', code: 'QAHAM', connections: ['Jebel Ali / Dubai', 'King Abdulaziz Port / Dammam', 'Jeddah Islamic Port', 'Chennai', 'Port of Singapore', 'Hamburg', 'Rotterdam'] }
+  ]},
+  { id: 'KW', country: 'Kuwait', flag: '🇰🇼', regionId: 'middle-east', ports: [
+    { name: 'Shuwaikh Port', code: 'KWSWK', connections: ['Jebel Ali / Dubai', 'Hamad Port', 'Jeddah Islamic Port'] },
+    { name: 'Shuaiba Industrial Port', code: 'KWSHU', connections: ['Jebel Ali / Dubai', 'Shuwaikh Port'] }
+  ]},
+  { id: 'BH', country: 'Bahrain', flag: '🇧🇭', regionId: 'middle-east', ports: [
+    { name: 'Khalifa Bin Salman Port', code: 'BHKBS', connections: ['Jebel Ali / Dubai', 'King Abdulaziz Port / Dammam', 'Hamad Port', 'Port of Singapore'] }
+  ]},
+  // ── SOUTH ASIA ──────────────────────────────────────────────────────────────
+  { id: 'IN', country: 'India', flag: '🇮🇳', regionId: 'south-asia', ports: [
+    { name: 'Chennai', code: 'INMAA', connections: ['Nhava Sheva / JNPT', 'Mundra', 'Kolkata / Haldia', 'Cochin / Kochi', 'Visakhapatnam', 'Tuticorin / V.O.C Port', 'Colombo', 'Port of Singapore', 'Jebel Ali / Dubai', 'Hamburg', 'Rotterdam', 'Los Angeles / Long Beach'] },
+    { name: 'Nhava Sheva / JNPT', code: 'INNSA', connections: ['Chennai', 'Mundra', 'Kolkata / Haldia', 'Kandla', 'Colombo', 'Port of Singapore', 'Jebel Ali / Dubai', 'Hamburg', 'Rotterdam', 'Los Angeles / Long Beach', 'New York / New Jersey'] },
+    { name: 'Mundra', code: 'INMUN', connections: ['Nhava Sheva / JNPT', 'Chennai', 'Kandla', 'Colombo', 'Port of Singapore', 'Jebel Ali / Dubai', 'Hamburg', 'Rotterdam', 'Los Angeles / Long Beach'] },
+    { name: 'Kolkata / Haldia', code: 'INCCU', connections: ['Chennai', 'Nhava Sheva / JNPT', 'Chittagong', 'Port of Singapore', 'Jebel Ali / Dubai', 'Hamburg', 'Rotterdam'] },
+    { name: 'Cochin / Kochi', code: 'INCOK', connections: ['Chennai', 'Mundra', 'Colombo', 'Port of Singapore', 'Jebel Ali / Dubai', 'Hamburg', 'Rotterdam'] },
+    { name: 'Visakhapatnam', code: 'INVTZ', connections: ['Chennai', 'Kolkata / Haldia', 'Port of Singapore', 'Jebel Ali / Dubai'] },
+    { name: 'Kandla', code: 'INKLA', connections: ['Mundra', 'Nhava Sheva / JNPT', 'Jebel Ali / Dubai', 'Port of Singapore'] },
+    { name: 'Tuticorin / V.O.C Port', code: 'INTIC', connections: ['Chennai', 'Colombo', 'Cochin / Kochi', 'Jebel Ali / Dubai'] },
+    { name: 'Mormugao / Goa', code: 'INMRM', connections: ['Nhava Sheva / JNPT', 'Colombo', 'Port of Singapore'] },
+    { name: 'Ennore / Kamarajar', code: 'INENR', connections: ['Chennai', 'Visakhapatnam', 'Colombo'] }
+  ]},
+  { id: 'LK', country: 'Sri Lanka', flag: '🇱🇰', regionId: 'south-asia', ports: [
+    { name: 'Colombo', code: 'LKCMB', connections: ['Chennai', 'Nhava Sheva / JNPT', 'Mundra', 'Cochin / Kochi', 'Port of Singapore', 'Jebel Ali / Dubai', 'Hamburg', 'Rotterdam', 'Los Angeles / Long Beach'] }
+  ]},
+  { id: 'BD', country: 'Bangladesh', flag: '🇧🇩', regionId: 'south-asia', ports: [
+    { name: 'Chittagong', code: 'BDCGP', connections: ['Kolkata / Haldia', 'Chennai', 'Port of Singapore', 'Port Klang', 'Jebel Ali / Dubai', 'Colombo'] },
+    { name: 'Mongla', code: 'BDMGL', connections: ['Chittagong', 'Kolkata / Haldia', 'Colombo'] }
+  ]},
+  { id: 'PK', country: 'Pakistan', flag: '🇵🇰', regionId: 'south-asia', ports: [
+    { name: 'Karachi / Port Muhammad Bin Qasim', code: 'PKKHI', connections: ['Mundra', 'Nhava Sheva / JNPT', 'Kandla', 'Jebel Ali / Dubai', 'Port of Singapore', 'Hamburg', 'Rotterdam'] },
+    { name: 'Gwadar', code: 'PKGWD', connections: ['Karachi / Port Muhammad Bin Qasim', 'Jebel Ali / Dubai', 'Port of Singapore'] }
+  ]},
+  { id: 'MV', country: 'Maldives', flag: '🇲🇻', regionId: 'south-asia', ports: [
+    { name: 'Malé Commercial Port', code: 'MVMLE', connections: ['Colombo', 'Cochin / Kochi', 'Jebel Ali / Dubai'] }
+  ]},
+  // ── AFRICA ──────────────────────────────────────────────────────────────────
+  { id: 'ZA', country: 'South Africa', flag: '🇿🇦', regionId: 'africa', ports: [
+    { name: 'Durban', code: 'ZADDR', connections: ['Cape Town', 'Port Elizabeth / Gqeberha', 'Maputo Port', 'Dar es Salaam', 'Jebel Ali / Dubai', 'Port of Singapore', 'Hamburg', 'Rotterdam'] },
+    { name: 'Cape Town', code: 'ZACPT', connections: ['Durban', 'Port Elizabeth / Gqeberha', 'Algeciras', 'Rotterdam', 'Hamburg'] },
+    { name: 'Port Elizabeth / Gqeberha', code: 'ZAELS', connections: ['Durban', 'Cape Town', 'Hamburg', 'Rotterdam'] }
+  ]},
+  { id: 'NG', country: 'Nigeria', flag: '🇳🇬', regionId: 'africa', ports: [
+    { name: 'Apapa / Lagos', code: 'NGAPP', connections: ['Tema', 'Abidjan', 'Jebel Ali / Dubai', 'Hamburg', 'Rotterdam', 'New York / New Jersey'] },
+    { name: 'Tin Can Island', code: 'NGTIN', connections: ['Apapa / Lagos', 'Tema', 'Jebel Ali / Dubai', 'Hamburg'] },
+    { name: 'Onne Port / Port Harcourt', code: 'NGONN', connections: ['Apapa / Lagos', 'Tema', 'Jebel Ali / Dubai'] }
+  ]},
+  { id: 'AO', country: 'Angola', flag: '🇦🇴', regionId: 'africa', ports: [
+    { name: 'Luanda', code: 'AOLAD', connections: ['Cape Town', 'Durban', 'Jebel Ali / Dubai', 'Rotterdam', 'Hamburg'] }
+  ]},
+  { id: 'SN', country: 'Senegal', flag: '🇸🇳', regionId: 'africa', ports: [
+    { name: 'Dakar', code: 'SNDKR', connections: ['Tanger Med', 'Algeciras', 'Rotterdam', 'Hamburg'] }
+  ]},
+  { id: 'KE', country: 'Kenya', flag: '🇰🇪', regionId: 'africa', ports: [
+    { name: 'Mombasa', code: 'KEMBA', connections: ['Dar es Salaam', 'Djibouti Port', 'Durban', 'Jebel Ali / Dubai', 'Port of Singapore', 'Hamburg', 'Rotterdam'] }
+  ]},
+  { id: 'TZ', country: 'Tanzania', flag: '🇹🇿', regionId: 'africa', ports: [
+    { name: 'Dar es Salaam', code: 'TZDAR', connections: ['Mombasa', 'Durban', 'Maputo Port', 'Jebel Ali / Dubai', 'Port of Singapore', 'Hamburg'] }
+  ]},
+  { id: 'GH', country: 'Ghana', flag: '🇬🇭', regionId: 'africa', ports: [
+    { name: 'Tema', code: 'GHTEM', connections: ['Abidjan', 'Apapa / Lagos', 'Jebel Ali / Dubai', 'Hamburg', 'Rotterdam'] }
+  ]},
+  { id: 'CI', country: 'Ivory Coast', flag: '🇨🇮', regionId: 'africa', ports: [
+    { name: 'Abidjan', code: 'CIABJ', connections: ['Tema', 'Apapa / Lagos', 'Jebel Ali / Dubai', 'Hamburg', 'Rotterdam'] }
+  ]},
+  { id: 'EG', country: 'Egypt', flag: '🇪🇬', regionId: 'africa', ports: [
+    { name: 'Port Said East', code: 'EGPSE', connections: ['Alexandria / Damietta', 'Piraeus', 'Gioia Tauro', 'Algeciras', 'Jebel Ali / Dubai', 'Port of Singapore'] },
+    { name: 'Alexandria / Damietta', code: 'EGALY', connections: ['Port Said East', 'Tanger Med', 'Piraeus', 'Genoa', 'Hamburg', 'Rotterdam'] }
+  ]},
+  { id: 'MA', country: 'Morocco', flag: '🇲🇦', regionId: 'africa', ports: [
+    { name: 'Tanger Med', code: 'MATNG', connections: ['Algeciras', 'Valencia', 'Rotterdam', 'Hamburg', 'Felixstowe'] },
+    { name: 'Casablanca', code: 'MACAS', connections: ['Tanger Med', 'Algeciras', 'Rotterdam', 'Hamburg'] }
+  ]},
+  { id: 'DJ', country: 'Djibouti', flag: '🇩🇯', regionId: 'africa', ports: [
+    { name: 'Djibouti Port', code: 'DJJIB', connections: ['Mombasa', 'Dar es Salaam', 'Jeddah Islamic Port', 'Jebel Ali / Dubai', 'Chennai', 'Port of Singapore'] }
+  ]},
+  { id: 'MZ', country: 'Mozambique', flag: '🇲🇿', regionId: 'africa', ports: [
+    { name: 'Maputo Port', code: 'MZMPM', connections: ['Durban', 'Dar es Salaam', 'Cape Town', 'Jebel Ali / Dubai'] }
+  ]},
+  // ── NORTH AMERICA ───────────────────────────────────────────────────────────
+  { id: 'US', country: 'United States', flag: '🇺🇸', regionId: 'north-america', ports: [
+    { name: 'Los Angeles / Long Beach', code: 'USLAX', connections: ['New York / New Jersey', 'Seattle / Tacoma', 'Houston', 'Vancouver', 'Busan', 'Shanghai', 'Port of Singapore', 'Jebel Ali / Dubai', 'Hamburg', 'Rotterdam'] },
+    { name: 'New York / New Jersey', code: 'USNYC', connections: ['Los Angeles / Long Beach', 'Houston', 'Savannah', 'Montreal', 'Halifax', 'Busan', 'Shanghai', 'Jebel Ali / Dubai', 'Hamburg', 'Rotterdam', 'Felixstowe'] },
+    { name: 'Seattle / Tacoma', code: 'USSEA', connections: ['Los Angeles / Long Beach', 'Vancouver', 'Prince Rupert', 'Busan', 'Shanghai', 'Yokohama'] },
+    { name: 'Houston', code: 'USHOU', connections: ['Los Angeles / Long Beach', 'New York / New Jersey', 'Miami', 'Savannah', 'Cartagena', 'Jebel Ali / Dubai', 'Rotterdam', 'Hamburg'] },
+    { name: 'Savannah', code: 'USSAV', connections: ['New York / New Jersey', 'Houston', 'Charleston', 'Rotterdam', 'Hamburg', 'Felixstowe'] },
+    { name: 'Baltimore', code: 'USBAL', connections: ['New York / New Jersey', 'Savannah', 'Rotterdam', 'Hamburg'] },
+    { name: 'Miami', code: 'USMIA', connections: ['New York / New Jersey', 'Houston', 'Cartagena', 'Rotterdam', 'Hamburg'] },
+    { name: 'Charleston', code: 'USCHS', connections: ['Savannah', 'New York / New Jersey', 'Rotterdam', 'Hamburg'] },
+    { name: 'Norfolk / Hampton Roads', code: 'USNOR', connections: ['New York / New Jersey', 'Savannah', 'Rotterdam', 'Hamburg'] }
+  ]},
+  { id: 'CA', country: 'Canada', flag: '🇨🇦', regionId: 'north-america', ports: [
+    { name: 'Vancouver', code: 'CAVAN', connections: ['Los Angeles / Long Beach', 'Seattle / Tacoma', 'Prince Rupert', 'Busan', 'Shanghai', 'Yokohama'] },
+    { name: 'Prince Rupert', code: 'CAPRU', connections: ['Vancouver', 'Los Angeles / Long Beach', 'Busan', 'Shanghai'] },
+    { name: 'Montreal', code: 'CAMTR', connections: ['New York / New Jersey', 'Halifax', 'Rotterdam', 'Hamburg', 'Felixstowe'] },
+    { name: 'Halifax', code: 'CAHAL', connections: ['Montreal', 'New York / New Jersey', 'Rotterdam', 'Hamburg'] }
+  ]},
+  { id: 'MX', country: 'Mexico', flag: '🇲🇽', regionId: 'north-america', ports: [
+    { name: 'Manzanillo', code: 'MXZLO', connections: ['Los Angeles / Long Beach', 'Lázaro Cárdenas', 'Shanghai', 'Port of Singapore', 'Busan'] },
+    { name: 'Lázaro Cárdenas', code: 'MXLZC', connections: ['Manzanillo', 'Los Angeles / Long Beach', 'Shanghai'] },
+    { name: 'Veracruz', code: 'MXVER', connections: ['Houston', 'New York / New Jersey', 'Altamira', 'Rotterdam', 'Hamburg'] },
+    { name: 'Altamira', code: 'MXATM', connections: ['Veracruz', 'Houston', 'Rotterdam'] }
+  ]},
+  { id: 'CO', country: 'Colombia', flag: '🇨🇴', regionId: 'south-america', ports: [
+    { name: 'Cartagena', code: 'COCTG', connections: ['Houston', 'Miami', 'New York / New Jersey', 'Buenaventura', 'Rotterdam', 'Hamburg'] },
+    { name: 'Buenaventura', code: 'COBUN', connections: ['Los Angeles / Long Beach', 'Cartagena', 'Manzanillo', 'Port of Singapore'] }
+  ]},
+  { id: 'BR', country: 'Brazil', flag: '🇧🇷', regionId: 'south-america', ports: [
+    { name: 'Santos', code: 'BRSSZ', connections: ['Paranaguá', 'Itajaí', 'Buenaventura', 'Callao', 'San Antonio', 'Rotterdam', 'Hamburg'] },
+    { name: 'Paranaguá', code: 'BRPNG', connections: ['Santos', 'Itajaí', 'Callao', 'San Antonio', 'Rotterdam'] },
+    { name: 'Itajaí', code: 'BRITJ', connections: ['Santos', 'Paranaguá', 'Buenos Aires', 'Rotterdam'] },
+    { name: 'Navegantes / Itapoá', code: 'BRNVN', connections: ['Itajaí', 'Santos', 'Paranaguá', 'Rotterdam'] }
+  ]},
+  { id: 'AR', country: 'Argentina', flag: '🇦🇷', regionId: 'south-america', ports: [
+    { name: 'Buenos Aires', code: 'ARBUE', connections: ['Itajaí', 'Santos', 'Callao', 'Rotterdam', 'Hamburg'] },
+    { name: 'Rosario', code: 'ARROS', connections: ['Buenos Aires', 'Santos', 'Paranaguá', 'Rotterdam'] }
+  ]},
+  { id: 'CL', country: 'Chile', flag: '🇨🇱', regionId: 'south-america', ports: [
+    { name: 'San Antonio', code: 'CLSAI', connections: ['Valparaíso', 'Callao', 'Buenaventura', 'Los Angeles / Long Beach', 'Shanghai'] },
+    { name: 'Valparaíso', code: 'CLVAP', connections: ['San Antonio', 'Callao', 'Los Angeles / Long Beach', 'Shanghai'] }
+  ]},
+  { id: 'PE', country: 'Peru', flag: '🇵🇪', regionId: 'south-america', ports: [
+    { name: 'Callao', code: 'PECLL', connections: ['San Antonio', 'Valparaíso', 'Buenaventura', 'Los Angeles / Long Beach', 'Shanghai', 'Busan'] }
+  ]},
+  { id: 'EC', country: 'Ecuador', flag: '🇪🇨', regionId: 'south-america', ports: [
+    { name: 'Guayaquil', code: 'ECGYE', connections: ['Buenaventura', 'Callao', 'Cartagena', 'Los Angeles / Long Beach', 'Rotterdam'] }
+  ]},
+  { id: 'UY', country: 'Uruguay', flag: '🇺🇾', regionId: 'south-america', ports: [
+    { name: 'Montevideo', code: 'UYMVD', connections: ['Buenos Aires', 'Santos', 'Paranaguá', 'Rotterdam', 'Hamburg'] }
+  ]},
+  // ── OCEANIA ─────────────────────────────────────────────────────────────────
+  { id: 'AU', country: 'Australia', flag: '🇦🇺', regionId: 'oceania', ports: [
+    { name: 'Sydney', code: 'AUSYD', connections: ['Melbourne', 'Brisbane', 'Auckland', 'Port of Singapore', 'Shanghai', 'Los Angeles / Long Beach'] },
+    { name: 'Melbourne', code: 'AUMEL', connections: ['Sydney', 'Adelaide', 'Auckland', 'Port of Singapore', 'Shanghai', 'Los Angeles / Long Beach'] },
+    { name: 'Brisbane', code: 'AUBNE', connections: ['Sydney', 'Auckland', 'Port of Singapore', 'Shanghai', 'Busan'] },
+    { name: 'Fremantle', code: 'AUFRE', connections: ['Adelaide', 'Melbourne', 'Port of Singapore', 'Tanjung Pelepas', 'Jebel Ali / Dubai', 'Shanghai'] },
+    { name: 'Adelaide', code: 'AUADL', connections: ['Melbourne', 'Fremantle', 'Port of Singapore', 'Shanghai'] }
+  ]},
+  { id: 'NZ', country: 'New Zealand', flag: '🇳🇿', regionId: 'oceania', ports: [
+    { name: 'Auckland', code: 'NZAKL', connections: ['Tauranga', 'Sydney', 'Brisbane', 'Port of Singapore', 'Shanghai', 'Los Angeles / Long Beach'] },
+    { name: 'Tauranga', code: 'NZTRG', connections: ['Auckland', 'Sydney', 'Port of Singapore', 'Shanghai'] }
   ]}
 ];
 
 const allServicePorts = servicePortNetwork.flatMap(country =>
-  country.ports.map(port => ({ ...port, country: country.country, countryId: country.id, flag: country.flag }))
+  country.ports.map(port => ({ ...port, country: country.country, countryId: country.id, flag: country.flag, regionId: country.regionId }))
 );
 
 
@@ -217,6 +381,25 @@ export const GlobalNetwork = () => {
   );
   const activeServicePort = activeServiceCountry?.ports.find(port => port.name === servicePortName) || activeServiceCountry?.ports[0];
 
+  // Regions served purely through the port network (South America, Oceania)
+  // have no operating desks, so their selector ribbon shows their service
+  // ports instead of going blank.
+  const regionPortChips = activeTab === 'all'
+    ? []
+    : servicePortNetwork
+      .filter(country => country.regionId === activeTab)
+      .flatMap(country => country.ports.map(port => ({
+        ...port,
+        country: country.country,
+        countryId: country.id,
+        flag: country.flag,
+        regionId: country.regionId
+      })))
+      .filter(port => searchQuery === '' ||
+        port.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        port.country.toLowerCase().includes(searchQuery.toLowerCase()));
+  const ribbonShowsPorts = activeViewMode === 'hubs' && filteredHubs.length === 0 && regionPortChips.length > 0;
+
 
   const handleSelectSea = (sea) => {
     setActiveSeaDomain(sea);
@@ -243,6 +426,11 @@ export const GlobalNetwork = () => {
     setServicePortName(port.name);
     setActiveViewMode('hubs');
     setActiveSeaDomain(null);
+    // Light up the region the clicked port belongs to so its cluster of
+    // ports and internal connections stand out in the region colour.
+    if (port.regionId) {
+      setActiveTab(port.regionId);
+    }
   };
 
   if (isLoading) {
@@ -260,7 +448,7 @@ export const GlobalNetwork = () => {
     <div className="global-network-page">
       <SEO 
         title="Global Network & Trade Corridors — Strategic Freight Operations"
-        description="Explore GACIS trade lanes spanning India, the Gulf, and Central Asia (CIS) with multimodal block trains, sea-air routing, and regional desks."
+        description="Explore GACIS trade lanes across South Asia, the Gulf, Europe, Asia, Africa, the Americas and Oceania, with 170 mapped service ports, multimodal block trains, sea-air routing and regional operating desks."
         canonical="/global-network"
       />
 
@@ -298,18 +486,18 @@ export const GlobalNetwork = () => {
           {/* Quick Telemetry KPI Bar */}
           <div className="network-telemetry-bar">
             <div className="ntb-stat">
-              <span className="ntb-val text-cyan tabular-nums">14</span>
-              <span className="ntb-label">Operating Desks & Hubs</span>
+              <span className="ntb-val text-cyan tabular-nums">{primaryHubs.length}+</span>
+              <span className="ntb-label">Operating Desks &amp; Hubs</span>
             </div>
             <div className="ntb-divider" />
             <div className="ntb-stat">
-              <span className="ntb-val text-gold tabular-nums">19</span>
+              <span className="ntb-val text-gold tabular-nums">{maritimeSeaDomains.length}+</span>
               <span className="ntb-label">Strategic Maritime Seas</span>
             </div>
             <div className="ntb-divider" />
             <div className="ntb-stat">
-              <span className="ntb-val tabular-nums">150+</span>
-              <span className="ntb-label">Global Agency Alliances</span>
+              <span className="ntb-val tabular-nums">{allServicePorts.length}+</span>
+              <span className="ntb-label">Global Service Ports</span>
             </div>
             <div className="ntb-divider" />
             <div className="ntb-stat">
@@ -339,7 +527,7 @@ export const GlobalNetwork = () => {
                 }}
               >
                 <Building2 size={16} />
-                <span>14 Continental Hubs</span>
+                <span>{primaryHubs.length} Continental Hubs</span>
               </button>
               <button
                 type="button"
@@ -350,7 +538,7 @@ export const GlobalNetwork = () => {
                 }}
               >
                 <Waves size={16} />
-                <span>19 Strategic Seas</span>
+                <span>{maritimeSeaDomains.length} Strategic Seas</span>
               </button>
             </div>
 
@@ -411,145 +599,9 @@ export const GlobalNetwork = () => {
                 servicePortNetwork={servicePortNetwork}
                 activeServicePort={activeServicePort}
                 onSelectServicePort={handleSelectServicePort}
+                activeRegion={activeTab}
               />
             </Suspense>
-
-            {/* Import / Export coverage overlay — tied visually to the geographic map */}
-            <div className="map-service-coverage">
-              <div className="map-service-row import-route">
-                <div className="map-service-label">
-                  <ArrowDownLeft size={14} aria-hidden="true" />
-                  <div>
-                    <span>IMPORT SERVICE</span>
-                    <strong>International Ports → India</strong>
-                  </div>
-                </div>
-                <div className="map-service-tags">
-                  {importServicePorts.map((port) => <span key={port}>{port}</span>)}
-                </div>
-              </div>
-              <div className="map-service-row export-route">
-                <div className="map-service-label">
-                  <ArrowUpRight size={14} aria-hidden="true" />
-                  <div>
-                    <span>EXPORT SERVICE</span>
-                    <strong>Indian Ports → Global Destinations</strong>
-                  </div>
-                </div>
-                <div className="map-service-tags">
-                  {exportServiceRegions.map((region) => <span key={region}>{region}</span>)}
-                </div>
-              </div>
-            </div>
-
-            {/* Global port connectivity selector — country → port → connected ports */}
-            <div className="global-port-connectivity" aria-label="Global port connectivity network">
-              <div className="gpc-header">
-                <div>
-                  <span className="gpc-eyebrow">PORT-TO-PORT CONNECTIVITY</span>
-                  <h3>Global Service Ports & Connected Destinations</h3>
-                  <p>Select a country, then a port to see the ports in the GACIS service network that can connect with it.</p>
-                </div>
-                <div className="gpc-live-pill"><span className="gpc-live-dot" /> NETWORK DIRECTORY</div>
-              </div>
-
-              <div className="gpc-search-row">
-                <Search size={14} />
-                <input
-                  type="search"
-                  value={servicePortQuery}
-                  onChange={(e) => setServicePortQuery(e.target.value)}
-                  placeholder="Search country, port or UN/LOCODE..."
-                  aria-label="Search service countries and ports"
-                />
-                <span>{allServicePorts.length} mapped ports</span>
-              </div>
-
-              <div className="gpc-country-strip">
-                {filteredServiceCountries.map(country => (
-                  <button
-                    key={country.id}
-                    type="button"
-                    className={`gpc-country-btn ${serviceCountryId === country.id ? 'is-active' : ''}`}
-                    onClick={() => {
-                      setServiceCountryId(country.id);
-                      setServicePortName(country.ports[0]?.name || '');
-                    }}
-                  >
-                    <span className="gpc-country-flag">{country.flag}</span>
-                    <span>{country.country}</span>
-                    <small>{country.ports.length} ports</small>
-                  </button>
-                ))}
-              </div>
-
-              <div className="gpc-network-body">
-                <div className="gpc-port-column">
-                  <div className="gpc-column-head">
-                    <span>01</span>
-                    <div><strong>{activeServiceCountry.country}</strong><small>Available service ports</small></div>
-                  </div>
-                  <div className="gpc-port-list">
-                    {activeServiceCountry.ports.map(port => (
-                      <button
-                        key={port.name}
-                        type="button"
-                        className={`gpc-port-btn ${activeServicePort?.name === port.name ? 'is-active' : ''}`}
-                        onClick={() => handleSelectServicePort({
-                          ...port,
-                          country: activeServiceCountry.country,
-                          countryId: activeServiceCountry.id,
-                          flag: activeServiceCountry.flag
-                        })}
-                      >
-                        <span className="gpc-port-icon"><Anchor size={14} /></span>
-                        <span className="gpc-port-copy"><strong>{port.name}</strong><small>{port.code}</small></span>
-                        <span className="gpc-port-count">{port.connections.length}</span>
-                        <ChevronRight size={14} />
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="gpc-connection-column">
-                  <div className="gpc-column-head">
-                    <span>02</span>
-                    <div><strong>{activeServicePort?.name || 'Select a port'}</strong><small>Connected / service destinations</small></div>
-                  </div>
-                  {activeServicePort ? (
-                    <div className="gpc-connection-grid">
-                      {activeServicePort.connections.map((connection, index) => {
-                        const connected = allServicePorts.find(port => port.name === connection);
-                        return (
-                          <button
-                            key={`${connection}-${index}`}
-                            type="button"
-                            className="gpc-connection-card"
-                            onClick={() => {
-                              if (connected) handleSelectServicePort(connected);
-                            }}
-                          >
-                            <span className="gpc-connection-number">{String(index + 1).padStart(2, '0')}</span>
-                            <span className="gpc-connection-main">
-                              <strong>{connection}</strong>
-                              <small>{connected ? `${connected.flag} ${connected.country} · ${connected.code}` : 'Service destination'}</small>
-                            </span>
-                            <ArrowRight size={14} />
-                          </button>
-                        );
-                      })}
-                    </div>
-                  ) : null}
-                </div>
-              </div>
-
-              <div className="gpc-route-summary">
-                <div><span>ORIGIN PORT</span><strong>{activeServicePort?.name || '—'}</strong></div>
-                <ArrowRight size={18} />
-                <div><span>AVAILABLE SERVICE CONNECTIONS</span><strong>{activeServicePort?.connections.length || 0} destinations</strong></div>
-                <span className="gpc-disclaimer">Coverage directory — final routing depends on carrier, sailing, transshipment and operational availability.</span>
-              </div>
-            </div>
 
             {/* Hub / Sea Quick-Select Ribbon — overlaid at bottom of map */}
             <div className="map-selector-ribbon">
@@ -566,17 +618,39 @@ export const GlobalNetwork = () => {
 
               <div className="msr-chips-track">
                 {activeViewMode === 'seas' ? (
-                  filteredSeas.map((sea) => {
-                    const isSelected = activeSeaDomain?.id === sea.id;
+                  filteredSeas.length > 0 ? (
+                    filteredSeas.map((sea) => {
+                      const isSelected = activeSeaDomain?.id === sea.id;
+                      return (
+                        <button
+                          key={sea.id}
+                          type="button"
+                          className={`msr-chip sea-chip ${isSelected ? 'is-selected' : ''}`}
+                          onClick={() => handleSelectSea(sea)}
+                        >
+                          <span>⚓</span>
+                          <span>{sea.name}</span>
+                        </button>
+                      );
+                    })
+                  ) : (
+                    <span className="msr-empty-note">
+                      This region is served by sea domains in its neighbouring markets.
+                    </span>
+                  )
+                ) : ribbonShowsPorts ? (
+                  regionPortChips.map((port) => {
+                    const isSelected = activeServicePort?.name === port.name;
                     return (
                       <button
-                        key={sea.id}
+                        key={`${port.countryId}:${port.name}`}
                         type="button"
-                        className={`msr-chip sea-chip ${isSelected ? 'is-selected' : ''}`}
-                        onClick={() => handleSelectSea(sea)}
+                        className={`msr-chip port-chip ${isSelected ? 'is-selected' : ''}`}
+                        onClick={() => handleSelectServicePort(port)}
                       >
-                        <span>⚓</span>
-                        <span>{sea.name}</span>
+                        <span className="msr-chip-flag">{port.flag}</span>
+                        <span>{port.name}</span>
+                        <small>{port.code}</small>
                       </button>
                     );
                   })
@@ -1094,51 +1168,126 @@ export const GlobalNetwork = () => {
         </div>
       </section>
 
-      {/* ─── 06. GLOBAL PORT CONNECTIVITY DIRECTORY ─── */}
-      <section className="section-padding bg-secondary global-port-directory-section" data-reveal>
+      {/* ─── 06. GLOBAL PORT-TO-PORT CONNECTIVITY (single, merged directory) ─── */}
+      <section className="section-padding bg-secondary" data-reveal>
         <div className="container">
           <div className="section-heading section-heading-center">
             <span className="eyebrow">PORT CONNECTIVITY MATRIX</span>
             <h2>Country → Port → Connected Port Network</h2>
-            <p>Explore the service coverage directory by country and port. Selecting a port exposes its connected destinations and lets you pivot directly into another port.</p>
+            <p>Search by country, port or UN/LOCODE. Selecting a port exposes its connected destinations on the map above and lets you pivot directly into another port.</p>
           </div>
-          <div className="gpd-layout">
-            <div className="gpd-country-panel">
-              <div className="gpd-panel-title"><Globe2 size={16} /> SERVICE COUNTRIES <span>{servicePortNetwork.length}</span></div>
-              <div className="gpd-country-list">
-                {servicePortNetwork.map(country => (
-                  <button key={country.id} type="button" className={`gpd-country-row ${serviceCountryId === country.id ? 'is-active' : ''}`} onClick={() => { setServiceCountryId(country.id); setServicePortName(country.ports[0]?.name || ''); }}>
-                    <span>{country.flag}</span><strong>{country.country}</strong><small>{country.ports.length} ports</small><ChevronRight size={14} />
-                  </button>
-                ))}
+
+          <div className="global-port-connectivity" aria-label="Global port connectivity network">
+            <div className="gpc-header">
+              <div>
+                <span className="gpc-eyebrow">PORT-TO-PORT CONNECTIVITY</span>
+                <h3>Global Service Ports & Connected Destinations</h3>
+              </div>
+              <div className="gpc-live-pill"><span className="gpc-live-dot" /> NETWORK DIRECTORY</div>
+            </div>
+
+            <div className="gpc-search-row">
+              <Search size={14} />
+              <input
+                type="search"
+                value={servicePortQuery}
+                onChange={(e) => setServicePortQuery(e.target.value)}
+                placeholder="Search country, port or UN/LOCODE..."
+                aria-label="Search service countries and ports"
+              />
+              <span>{allServicePorts.length} mapped ports</span>
+            </div>
+
+            <div className="gpc-country-strip">
+              {filteredServiceCountries.map(country => (
+                <button
+                  key={country.id}
+                  type="button"
+                  className={`gpc-country-btn ${serviceCountryId === country.id ? 'is-active' : ''}`}
+                  onClick={() => {
+                    setServiceCountryId(country.id);
+                    setServicePortName(country.ports[0]?.name || '');
+                  }}
+                >
+                  <span className="gpc-country-flag">{country.flag}</span>
+                  <span>{country.country}</span>
+                  <small>{country.ports.length} ports</small>
+                </button>
+              ))}
+            </div>
+
+            <div className="gpc-network-body">
+              <div className="gpc-port-column">
+                <div className="gpc-column-head">
+                  <span>01</span>
+                  <div><strong>{activeServiceCountry.country}</strong><small>Available service ports</small></div>
+                </div>
+                <div className="gpc-port-list">
+                  {activeServiceCountry.ports.map(port => (
+                    <button
+                      key={port.name}
+                      type="button"
+                      className={`gpc-port-btn ${activeServicePort?.name === port.name ? 'is-active' : ''}`}
+                      onClick={() => handleSelectServicePort({
+                        ...port,
+                        country: activeServiceCountry.country,
+                        countryId: activeServiceCountry.id,
+                        flag: activeServiceCountry.flag,
+                        regionId: activeServiceCountry.regionId
+                      })}
+                    >
+                      <span className="gpc-port-icon"><Anchor size={14} /></span>
+                      <span className="gpc-port-copy"><strong>{port.name}</strong><small>{port.code}</small></span>
+                      <span className="gpc-port-count">{port.connections.length}</span>
+                      <ChevronRight size={14} />
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="gpc-connection-column">
+                <div className="gpc-column-head">
+                  <span>02</span>
+                  <div><strong>{activeServicePort?.name || 'Select a port'}</strong><small>Connected / service destinations</small></div>
+                </div>
+                {activeServicePort ? (
+                  <div className="gpc-connection-grid">
+                    {activeServicePort.connections.map((connection, index) => {
+                      const connected = allServicePorts.find(port => port.name === connection);
+                      return (
+                        <button
+                          key={`${connection}-${index}`}
+                          type="button"
+                          className="gpc-connection-card"
+                          onClick={() => {
+                            if (connected) handleSelectServicePort(connected);
+                          }}
+                        >
+                          <span className="gpc-connection-number">{String(index + 1).padStart(2, '0')}</span>
+                          <span className="gpc-connection-main">
+                            <strong>{connection}</strong>
+                            <small>{connected ? `${connected.flag} ${connected.country} · ${connected.code}` : 'Service destination'}</small>
+                          </span>
+                          <ArrowRight size={14} />
+                        </button>
+                      );
+                    })}
+                  </div>
+                ) : null}
               </div>
             </div>
-            <div className="gpd-main-panel">
-              <div className="gpd-main-head">
-                <div><span className="gpd-kicker">SELECTED COUNTRY</span><h3>{activeServiceCountry.flag} {activeServiceCountry.country}</h3><p>{activeServiceCountry.scope || 'International service ports'}</p></div>
-                <span className="gpd-port-count-badge">{activeServiceCountry.ports.length} mapped ports</span>
-              </div>
-              <div className="gpd-port-grid">
-                {activeServiceCountry.ports.map(port => (
-                  <button key={port.name} type="button" className={`gpd-port-card ${activeServicePort?.name === port.name ? 'is-active' : ''}`} onClick={() => setServicePortName(port.name)}>
-                    <div className="gpd-port-card-top"><Anchor size={16} /><span>{port.code}</span></div>
-                    <strong>{port.name}</strong>
-                    <small>{port.connections.length} connected destinations</small>
-                    <div className="gpd-mini-route"><span>CONNECTS TO</span><em>{port.connections.slice(0, 4).join(' · ')}{port.connections.length > 4 ? ' · …' : ''}</em></div>
-                  </button>
-                ))}
-              </div>
-              <div className="gpd-selected-route">
-                <div className="gpd-selected-origin"><span>SELECTED PORT</span><strong>{activeServicePort?.name}</strong><small>{activeServicePort?.code} · {activeServiceCountry.country}</small></div>
-                <div className="gpd-route-line"><span className="gpd-route-dot origin" /><span /><ArrowRight size={18} /><span /><span className="gpd-route-dot destination" /></div>
-                <div className="gpd-selected-dest"><span>CONNECTED PORTS</span><strong>{activeServicePort?.connections.length || 0} destinations</strong><small>Click any destination in the map selector above to pivot the network.</small></div>
-              </div>
+
+            <div className="gpc-route-summary">
+              <div><span>ORIGIN PORT</span><strong>{activeServicePort?.name || '—'}</strong></div>
+              <ArrowRight size={18} />
+              <div><span>AVAILABLE SERVICE CONNECTIONS</span><strong>{activeServicePort?.connections.length || 0} destinations</strong></div>
+              <span className="gpc-disclaimer">Coverage directory — final routing depends on carrier, sailing, transshipment and operational availability.</span>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ─── 06. GLOBAL AGENCY ALLIANCE BANNER ─── */}
+      {/* ─── 07. GLOBAL AGENCY ALLIANCE BANNER ─── */}
       <section className="section-padding-sm bg-dark" data-reveal>
         <div className="container">
           <div className="global-alliance-inner">

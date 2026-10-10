@@ -5,8 +5,10 @@ import { Plus, Minus, RotateCcw, Compass, Waves, Building2 } from 'lucide-react'
 import { primaryHubs, maritimeSeaDomains } from '../../data/locations';
 import './RealGeographicMap.css';
 
-// ─── Utility: Calculate smooth curved great-circle arc points ─────────────────────
-function getCurvedArcPoints(start, end, numPoints = 40) {
+// ─── Utility: Smooth curved great-circle arc points ─────────────────────
+// `extraBias` shifts the quadratic control point so two arcs can be drawn on
+// the same chord as parallel inbound / outbound lanes.
+function getCurvedArcPoints(start, end, numPoints = 40, extraBias = 0) {
   const points = [];
   const startLat = start.lat;
   const startLng = start.lng;
@@ -16,12 +18,12 @@ function getCurvedArcPoints(start, end, numPoints = 40) {
   // Midpoint
   const midLat = (startLat + endLat) / 2;
   const midLng = (startLng + endLng) / 2;
-  
+
   // Distance calculation for proportional curvature
   const dLat = endLat - startLat;
   const dLng = endLng - startLng;
   const dist = Math.sqrt(dLat * dLat + dLng * dLng);
-  const curvature = Math.min(dist * 0.14, 5.5);
+  const curvature = Math.min(dist * 0.14, 5.5) + extraBias;
 
   // Perpendicular curve offset
   const offsetLat = midLat + (dLng > 0 ? curvature : -curvature);
@@ -34,6 +36,75 @@ function getCurvedArcPoints(start, end, numPoints = 40) {
     points.push([lat, lng]);
   }
   return points;
+}
+
+// ─── Utility: Great-circle distance in km (haversine) ────────────────────
+// Used to build the proximity graph so each port only links to its nearest
+// regional neighbours instead of every port in the region.
+function haversineKm(a, b) {
+  const R = 6371;
+  const toRad = (deg) => deg * Math.PI / 180;
+  const dLat = toRad(b.lat - a.lat);
+  const dLng = toRad(b.lng - a.lng);
+  const lat1 = toRad(a.lat);
+  const lat2 = toRad(b.lat);
+  const h = Math.sin(dLat / 2) * Math.sin(dLat / 2)
+    + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) * Math.sin(dLng / 2);
+  return 2 * R * Math.asin(Math.min(1, Math.sqrt(h)));
+}
+
+// ─── Utility: One continuous chain through every port in a region ───────────
+// Threads ALL ports into a single ordered path using a greedy nearest-
+// neighbour walk, so the result is one connected network: no isolated ports,
+// no disconnected segments and no separate two-port loops. Consecutive ports
+// are always physical neighbours, which keeps the chain geographically
+// sensible and short.
+//
+// The starting port matters for path quality, so every port is tried as the
+// seed and the walk with the shortest total length wins.
+function buildRegionalChain(ports) {
+  if (ports.length === 0) return [];
+  if (ports.length === 1) return [ports[0]];
+
+  let bestPath = null;
+  let bestLength = Infinity;
+
+  for (let seed = 0; seed < ports.length; seed++) {
+    const remaining = new Set(ports.map((p) => p.name));
+    const path = [];
+    let current = ports[seed];
+    let total = 0;
+
+    remaining.delete(current.name);
+    path.push(current);
+
+    while (remaining.size > 0) {
+      let nearest = null;
+      let nearestKm = Infinity;
+      for (let i = 0; i < ports.length; i++) {
+        const candidate = ports[i];
+        if (!remaining.has(candidate.name)) continue;
+        const km = haversineKm(current, candidate);
+        if (km < nearestKm) {
+          nearestKm = km;
+          nearest = candidate;
+        }
+      }
+      if (!nearest) break; // unreachable in practice — same region/CSS guard
+      total += nearestKm;
+      path.push(nearest);
+      remaining.delete(nearest.name);
+      current = nearest;
+    }
+
+    if (path.length === ports.length && total < bestLength) {
+      bestLength = total;
+      bestPath = path;
+    }
+  }
+
+  // Fall back to the data order only if no complete walk was found.
+  return bestPath || ports;
 }
 
 // ─── Service-port map coordinates ─────────────────────────────────────────────
@@ -141,7 +212,95 @@ const SERVICE_PORT_COORDS = {
   'Mombasa': [-4.04, 39.67],
   'Durban': [-29.87, 31.05],
   'Shenzhen / Yantian': [22.55, 114.27],
-  'Hong Kong': [22.33, 114.11]
+  'Hong Kong': [22.33, 114.11],
+  // ── Philippines ──
+  'Manila North Harbour': [14.60, 120.96],
+  'Batangas': [13.76, 121.05],
+  'Subic Bay': [14.80, 120.28],
+  // ── Northern & Baltic Europe ──
+  'Port of Gdansk': [54.40, 18.67],
+  'Port of Gdynia': [54.53, 18.54],
+  'Thessaloniki': [40.64, 22.94],
+  'Sines': [37.95, -8.88],
+  'Leixões': [41.18, -8.70],
+  'Gothenburg': [57.71, 11.97],
+  'Helsinki': [60.17, 24.94],
+  'HaminaKotka': [60.57, 27.19],
+  'Copenhagen / Malmö': [55.71, 12.60],
+  'Aarhus': [56.16, 10.21],
+  // ── Middle East ──
+  'Jeddah Islamic Port': [21.50, 39.17],
+  'King Abdulaziz Port / Dammam': [26.42, 50.10],
+  'Jubail Commercial Port': [27.03, 49.66],
+  'Salalah Port': [17.02, 54.00],
+  'Sohar Port': [24.50, 56.62],
+  'Hamad Port': [24.60, 51.62],
+  'Shuwaikh Port': [29.35, 47.93],
+  'Shuaiba Industrial Port': [29.02, 48.14],
+  'Khalifa Bin Salman Port': [26.20, 50.60],
+  // ── South Asia ──
+  'Tuticorin / V.O.C Port': [8.76, 78.13],
+  'Mormugao / Goa': [15.40, 73.80],
+  'Ennore / Kamarajar': [13.22, 80.32],
+  'Mongla': [22.48, 89.60],
+  'Karachi / Port Muhammad Bin Qasim': [24.85, 67.00],
+  'Gwadar': [25.12, 62.33],
+  'Malé Commercial Port': [4.18, 73.51],
+  // ── Africa ──
+  'Cape Town': [-33.91, 18.42],
+  'Port Elizabeth / Gqeberha': [-33.96, 25.63],
+  'Apapa / Lagos': [6.44, 3.37],
+  'Tin Can Island': [6.44, 3.34],
+  'Onne Port / Port Harcourt': [4.72, 7.15],
+  'Luanda': [-8.84, 13.23],
+  'Dakar': [14.68, -17.43],
+  'Dar es Salaam': [-6.82, 39.30],
+  'Tema': [5.67, 0.02],
+  'Abidjan': [5.28, -4.02],
+  'Port Said East': [31.26, 32.30],
+  'Alexandria / Damietta': [31.20, 29.90],
+  'Tanger Med': [35.90, -5.50],
+  'Casablanca': [33.60, -7.63],
+  'Djibouti Port': [11.60, 43.13],
+  'Maputo Port': [-25.96, 32.57],
+  // ── North America ──
+  'Seattle / Tacoma': [47.60, -122.34],
+  'Houston': [29.73, -95.09],
+  'Savannah': [32.08, -81.10],
+  'Baltimore': [39.28, -76.58],
+  'Miami': [25.78, -80.18],
+  'Charleston': [32.78, -79.93],
+  'Norfolk / Hampton Roads': [36.94, -76.27],
+  'Vancouver': [49.29, -123.11],
+  'Prince Rupert': [54.31, -130.32],
+  'Montreal': [45.55, -73.55],
+  'Halifax': [44.65, -63.58],
+  'Manzanillo': [19.05, -104.32],
+  'Lázaro Cárdenas': [18.00, -102.19],
+  'Veracruz': [19.20, -96.13],
+  'Altamira': [22.35, -97.90],
+  'Cartagena': [10.40, -75.50],
+  'Buenaventura': [3.87, -77.25],
+  // ── South America ──
+  'Santos': [-23.96, -46.33],
+  'Paranaguá': [-25.51, -48.52],
+  'Itajaí': [-26.90, -48.65],
+  'Navegantes / Itapoá': [-26.90, -48.66],
+  'Buenos Aires': [-34.60, -58.37],
+  'Rosario': [-32.95, -60.64],
+  'Montevideo': [-34.90, -56.20],
+  'San Antonio': [-33.60, -71.62],
+  'Valparaíso': [-33.05, -71.62],
+  'Callao': [-12.05, -77.14],
+  'Guayaquil': [-2.19, -79.89],
+  // ── Oceania ──
+  'Sydney': [-33.86, 151.21],
+  'Melbourne': [-37.84, 144.93],
+  'Brisbane': [-27.47, 153.03],
+  'Fremantle': [-32.06, 115.74],
+  'Adelaide': [-34.94, 138.52],
+  'Auckland': [-36.84, 174.77],
+  'Tauranga': [-37.69, 176.17]
 };
 
 const SERVICE_PORT_ALIASES = {
@@ -170,7 +329,8 @@ export const RealGeographicMap = ({
   hoveredLaneId = null,
   servicePortNetwork = [],
   activeServicePort = null,
-  onSelectServicePort
+  onSelectServicePort,
+  activeRegion = 'all'
 }) => {
   const mapContainerRef = useRef(null);
   const mapInstanceRef = useRef(null);
@@ -178,8 +338,128 @@ export const RealGeographicMap = ({
   const seaMarkersRef = useRef({});
   const servicePortMarkersRef = useRef({});
   const connectionMarkersRef = useRef({});
+  const laneArrowMarkersRef = useRef({});
   const polylineLayersRef = useRef([]);
   const hasInitializedServicePortRef = useRef(false);
+  const lastFittedRegionRef = useRef('all');
+  const resolveLabelCollisionsRef = useRef(null);
+
+  // Current map zoom drives automatic port-name labelling.
+  const [zoomLevel, setZoomLevel] = useState(3);
+  const PORT_LABEL_ZOOM = 4.0;
+
+  // ─── Label collision resolution ───────────────────────────────────────────
+  // Three kinds of labels can land on the same spot: a hub city that is also a
+  // port (Port Klang, Singapore, Hamburg, Durban …), two ports on the same
+  // coastline (Lagos/Tin Can Island, Kobe/Osaka, the UAE gateways …), and sea
+  // beacons sitting under a port. Every label is measured and nudged to the
+  // free side of its pin; only a label with no free side is hidden. Hover and
+  // focus always reveal a hidden label, so no name becomes unreachable.
+  const resolveLabelCollisions = () => {
+    const map = mapInstanceRef.current;
+    if (!map) return;
+
+    // 1. Gather every label that is meant to be on screen.
+    const owners = [];
+    const collect = (markersRef, kind) => {
+      Object.entries(markersRef.current).forEach(([key, marker]) => {
+        const el = typeof marker.getElement === 'function' ? marker.getElement() : null;
+        if (!el || el.offsetParent === null) return; // marker hidden
+        const label = kind === 'hub'
+          ? el.querySelector('.pin-label-pill')
+          : kind === 'sea'
+            ? el.querySelector('.sea-label-pill')
+            : el.querySelector('.service-port-label');
+        if (!label) return;
+        // Port names are only on screen when labelled / selected.
+        if (kind === 'port'
+          && !el.classList.contains('is-service-labeled')
+          && !el.classList.contains('is-service-origin')
+          && !el.classList.contains('is-service-destination')) return;
+        owners.push({ key, el, label, kind });
+      });
+    };
+    collect(hubMarkersRef, 'hub');
+    collect(servicePortMarkersRef, 'port');
+    collect(seaMarkersRef, 'sea');
+
+    if (owners.length === 0) return;
+
+    // Sea pills sit below their pin by default; everything else sits above.
+    const flipClass = (owner) => (
+      owner.kind === 'sea' ? 'is-label-above' : 'is-label-below'
+    );
+
+    // 2. Clear previous decisions, then measure both sides of every label.
+    // Classes are batched with a single forced reflow between passes so this
+    // stays cheap even with ~100 labels.
+    owners.forEach((o) => {
+      o.label.classList.remove('is-label-below', 'is-label-above', 'is-label-collided');
+    });
+    void document.body.offsetWidth;
+
+    owners.forEach((o) => {
+      const r = o.label.getBoundingClientRect();
+      o.a = { l: r.left, r: r.right, t: r.top, b: r.bottom };
+    });
+
+    owners.forEach((o) => o.label.classList.add(flipClass(o)));
+    void document.body.offsetWidth;
+
+    owners.forEach((o) => {
+      const r = o.label.getBoundingClientRect();
+      o.b = { l: r.left, r: r.right, t: r.top, b: r.bottom };
+    });
+
+    owners.forEach((o) => o.label.classList.remove(flipClass(o)));
+    void document.body.offsetWidth;
+
+    // 3. Priority: the active selection first, then hubs, then idle labels.
+    const rank = (o) => {
+      if (o.kind === 'hub') {
+        if (o.el.querySelector('.is-origin-pin')) return 60;
+        if (o.el.querySelector('.is-destination-pin')) return 55;
+        if (o.el.querySelector('.is-region-pin')) return 40;
+        return 35;
+      }
+      if (o.kind === 'port') {
+        if (o.el.classList.contains('is-service-origin')) return 50;
+        if (o.el.classList.contains('is-service-destination')) return 45;
+        return 30;
+      }
+      return 10; // sea
+    };
+    owners.sort((x, y) => rank(y) - rank(x) || x.key.localeCompare(y.key));
+
+    const overlaps = (a, b) => (
+      a.l < b.r - 1 && a.r > b.l + 1 && a.t < b.b - 1 && a.b > b.t + 1
+    );
+    const hitsAny = (rect) => placed.some((p) => overlaps(rect, p));
+
+    // 4. Greedily place each label on its default side, else the other side.
+    const placed = [];
+    owners.forEach((o) => {
+      if (!hitsAny(o.a)) {
+        placed.push(o.a);
+        return;
+      }
+      if (!hitsAny(o.b)) {
+        o.label.classList.add(flipClass(o));
+        placed.push(o.b);
+        return;
+      }
+      // No free side — hide, but keep hover/focus revealing it.
+      o.label.classList.add('is-label-collided');
+    });
+  };
+  resolveLabelCollisionsRef.current = resolveLabelCollisions;
+
+  const scheduleLabelCollisionCheck = () => {
+    requestAnimationFrame(() => {
+      const fn = resolveLabelCollisionsRef.current;
+      if (fn) fn();
+    });
+  };
 
   // Initialize Map
   useEffect(() => {
@@ -222,6 +502,18 @@ export const RealGeographicMap = ({
       padding: window.innerWidth < 768 ? [15, 15] : [30, 30],
       maxZoom: 3.5
     });
+
+    // Track zoom so port names can appear automatically once the user
+    // zooms in far enough to read them without overlap.
+    setZoomLevel(mapInstance.getZoom());
+    mapInstance.on('zoomend', () => {
+      setZoomLevel(mapInstance.getZoom());
+    });
+
+    // Labels overlap whenever the viewport moves because ports sit close
+    // together — re-resolve after pan and zoom settle.
+    mapInstance.on('zoomend', scheduleLabelCollisionCheck);
+    mapInstance.on('moveend', scheduleLabelCollisionCheck);
 
     // 1. Initialize Hub Markers with clean icon structures
     primaryHubs.forEach((hub) => {
@@ -313,8 +605,8 @@ export const RealGeographicMap = ({
               </span>
             </button>
           `,
-          iconSize: [16, 16],
-          iconAnchor: [8, 8]
+          iconSize: [24, 24],
+          iconAnchor: [12, 12]
         });
 
         const marker = createMarker(coords, {
@@ -323,7 +615,7 @@ export const RealGeographicMap = ({
         }).addTo(mapInstance);
 
         marker.on('click', () => {
-          onSelectServicePort && onSelectServicePort({ ...port, country: country.country, countryId: country.id, flag: country.flag });
+          onSelectServicePort && onSelectServicePort({ ...port, country: country.country, countryId: country.id, flag: country.flag, regionId: country.regionId });
         });
 
         servicePortMarkersRef.current[`${country.id}:${port.name}`] = marker;
@@ -348,11 +640,153 @@ export const RealGeographicMap = ({
     polylineLayersRef.current.forEach(layer => map.removeLayer(layer));
     polylineLayersRef.current = [];
 
+    // 1b. Remove lane arrowheads drawn for the previous view
+    Object.values(laneArrowMarkersRef.current).forEach(marker => map.removeLayer(marker));
+    laneArrowMarkersRef.current = {};
+
+    // ── Region mode: only the selected region is visible. Hub trade lanes,
+    // other regions' hubs/ports and their global routes are all suppressed;
+    // only intra-region connections are drawn. ──
+    const regionHubs = activeRegion !== 'all'
+      ? primaryHubs.filter(h => h.regionId === activeRegion)
+      : [];
+    const isRegionMode = activeRegion !== 'all' && viewMode === 'hubs';
+
+    if (isRegionMode) {
+      // Draw arcs between every pair of hubs in the region
+      for (let i = 0; i < regionHubs.length; i++) {
+        for (let j = i + 1; j < regionHubs.length; j++) {
+          const a = regionHubs[i];
+          const b = regionHubs[j];
+          const arcPoints = getCurvedArcPoints(a.geo, b.geo);
+
+          const glowLine = polyline(arcPoints, {
+            color: '#f59e0b',
+            weight: 2.5,
+            opacity: 0.70,
+            className: 'region-connection-line',
+            lineCap: 'round'
+          }).addTo(map);
+
+          const flowLine = polyline(arcPoints, {
+            color: '#fef08a',
+            weight: 1.5,
+            opacity: 0.85,
+            dashArray: '5, 8',
+            className: 'region-connection-flow',
+            lineCap: 'round'
+          }).addTo(map);
+
+          polylineLayersRef.current.push(glowLine, flowLine);
+        }
+      }
+
+      // ── Continuous regional chain ─────────────────────────────────────────────
+      // Every port in the region is threaded into ONE connected chain ordered
+      // geographically (nearest-neighbour walk), so there are no isolated
+      // ports, no disconnected segments and no separate two-port loops.
+      // Consecutive ports are always physical neighbours, which keeps the
+      // chain short and readable instead of a long-haul web.
+      const LANE_BIAS = 0.42;
+
+      const regionPorts = [];
+      servicePortNetwork
+        .filter((c) => c.regionId === activeRegion)
+        .forEach((country) => {
+          country.ports.forEach((port) => {
+            const coords = SERVICE_PORT_COORDS[port.name];
+            if (!coords) return;
+            regionPorts.push({ name: port.name, lat: coords[0], lng: coords[1] });
+          });
+        });
+
+      const regionChain = buildRegionalChain(regionPorts);
+
+      // Draws one directional lane plus a bearing arrowhead along it.
+      const drawLane = (points, kind) => {
+        const isOut = kind === 'out';
+        const lineColor = isOut ? '#38bdf8' : '#fbbf24';
+        const flowColor = isOut ? '#e0f2fe' : '#fde68a';
+
+        const glow = polyline(points, {
+          color: lineColor,
+          weight: 2.4,
+          opacity: 0.5,
+          className: `region-lane region-lane-${kind}`,
+          lineCap: 'round'
+        }).addTo(map);
+
+        const flow = polyline(points, {
+          color: flowColor,
+          weight: 2,
+          opacity: 1,
+          dashArray: '7, 11',
+          className: `region-lane-flow region-lane-flow-${kind}`,
+          lineCap: 'round'
+        }).addTo(map);
+
+        polylineLayersRef.current.push(glow, flow);
+
+        // Arrowhead at the head of the lane, rotated to the local screen angle.
+        const idx = Math.floor(points.length * 0.68);
+        const at = points[idx];
+        const prev = points[Math.max(idx - 1, 0)];
+        const next = points[Math.min(idx + 1, points.length - 1)];
+        const pPrev = map.latLngToContainerPoint([prev[0], prev[1]]);
+        const pNext = map.latLngToContainerPoint([next[0], next[1]]);
+        const angle = Math.atan2(pNext.y - pPrev.y, pNext.x - pPrev.x) * 180 / Math.PI + 90;
+
+        const arrowIcon = divIcon({
+          className: 'region-lane-arrow',
+          html: `<span class="lane-arrow lane-arrow-${kind}" style="transform: rotate(${angle}deg)"></span>`,
+          iconSize: [18, 18],
+          iconAnchor: [9, 9]
+        });
+
+        const arrowMarker = createMarker([at[0], at[1]], {
+          icon: arrowIcon,
+          interactive: false,
+          zIndexOffset: 480
+        }).addTo(map);
+
+        const arrowId = `lane-${polylineLayersRef.current.length}-${kind}`;
+        laneArrowMarkersRef.current[arrowId] = arrowMarker;
+      };
+
+      // Thread the chain: every consecutive pair becomes one outbound lane
+      // (leaving the earlier port) and one inbound lane (arriving at it).
+      regionChain.forEach((from, index) => {
+        const to = regionChain[index + 1];
+        if (!to) return;
+
+        const outboundPoints = getCurvedArcPoints(from, to, 34, LANE_BIAS);
+        const inboundPoints = getCurvedArcPoints(from, to, 34, -LANE_BIAS).slice().reverse();
+
+        drawLane(outboundPoints, 'out'); // along the chain
+        drawLane(inboundPoints, 'in');   // back along the chain
+      });
+
+      // Fly the map to the region — only when the region itself changes, so it
+      // never fights the hub/port flyTo handlers. Regions that have ports but
+      // no operating desk (South America, Oceania) fit to their port chain
+      // instead of to hubs, so selecting them still flies the map there.
+      const regionChanged = lastFittedRegionRef.current !== activeRegion;
+      lastFittedRegionRef.current = activeRegion;
+      if (regionChanged && (regionHubs.length > 0 || regionChain.length > 0)) {
+        const boundsPoints = regionHubs.length > 0
+          ? regionHubs.map(h => [h.geo.lat, h.geo.lng])
+          : regionChain.map(p => [p.lat, p.lng]);
+        const bounds = new LatLngBounds(boundsPoints);
+        map.fitBounds(bounds, { padding: [60, 60], maxZoom: 5, animate: true, duration: 0.6 });
+      }
+    }
+
     const activeLanes = activeHub?.connectedTradeLanes || [];
     const connectedDestIds = new Set(activeLanes.map(l => l.destinationId));
 
-    // 2. Draw Clean Origin-to-Destination Trade Lanes (when in Hub mode)
-    if (viewMode === 'hubs' && activeHub && activeLanes.length > 0) {
+    // 2. Draw Clean Origin-to-Destination Trade Lanes (when in Hub mode).
+    // Suppressed in region mode so only intra-region connections are visible.
+    if (viewMode === 'hubs' && activeHub && activeLanes.length > 0 && !isRegionMode) {
       // Filter lanes if selectedLaneFilter is set
       const lanesToDraw = selectedLaneFilter === 'ALL'
         ? activeLanes
@@ -428,11 +862,15 @@ export const RealGeographicMap = ({
       const isOrigin = activeHub?.id === hub.id;
       const isDestination = connectedDestIds.has(hub.id);
       const isVisibleInMode = viewMode === 'hubs';
+      const isInRegion = !isRegionMode || hub.regionId === activeRegion;
+      // Outside the selected region, hubs are hidden entirely so only the
+      // active region's topology remains on screen.
+      const isHiddenByRegion = isRegionMode && !isInRegion;
 
       const updatedIcon = divIcon({
-        className: `gacis-map-pin-container ${!isVisibleInMode ? 'pin-mode-dimmed' : ''}`,
+        className: `gacis-map-pin-container ${!isVisibleInMode ? 'pin-mode-dimmed' : ''} ${isHiddenByRegion ? 'pin-mode-hidden' : ''} ${isRegionMode && isInRegion ? 'pin-region-highlight' : ''}`,
         html: `
-          <div class="clean-hub-pin ${isDubai ? 'is-dubai-hq' : ''} ${isOrigin ? 'is-origin-pin' : ''} ${isDestination ? 'is-destination-pin' : ''}">
+          <div class="clean-hub-pin ${isDubai ? 'is-dubai-hq' : ''} ${isOrigin ? 'is-origin-pin' : ''} ${isDestination ? 'is-destination-pin' : ''} ${isRegionMode && isInRegion ? 'is-region-pin' : ''}">
             <div class="pin-radar-ring"></div>
             <div class="pin-dot-core"></div>
             ${isOrigin ? '<span class="origin-status-badge">ORIGIN</span>' : ''}
@@ -447,12 +885,16 @@ export const RealGeographicMap = ({
       });
 
       marker.setIcon(updatedIcon);
-      marker.setZIndexOffset(isOrigin ? 1200 : isDestination ? 900 : isDubai ? 750 : 400);
+      marker.setZIndexOffset(isOrigin ? 1200 : isRegionMode && isInRegion ? 950 : isDestination ? 900 : isDubai ? 750 : 400);
     });
 
     // 4. Update Global Service Port Markers + active connection routes.
-    // Keep the full directory visible, while visually elevating the selected
-    // port and its connected destinations.
+    // The full 152-port directory stays clickable, but only the selected
+    // origin and its connected destinations render at full strength —
+    // everything else recedes to a small dim dot so it doesn't visually
+    // stack on top of the 14 hub pins and each other at low zoom.
+    // In region mode, ports outside the selected region are hidden entirely
+    // and only intra-region connections are drawn.
     const activeServiceConnections = activeServicePort?.connections || [];
     const activeServiceName = activeServicePort?.name || null;
     const connectedServiceNames = new Set(
@@ -464,37 +906,62 @@ export const RealGeographicMap = ({
       const canonicalName = resolveServicePortName(portName);
       const isOrigin = canonicalName === resolveServicePortName(activeServiceName || '');
       const isDestination = connectedServiceNames.has(canonicalName);
+      // In region mode, only show ports belonging to the selected region; hide all others.
+      const countryEntry = servicePortNetwork.find(c => c.ports.some(p => p.name === portName));
+      const portEntry = countryEntry?.ports.find(p => p.name === portName);
+      const portFlag = countryEntry?.flag || '';
+      const portCode = portEntry?.code || '';
+      const portRegion = countryEntry?.regionId || null;
+      const isInRegion = !isRegionMode || portRegion === activeRegion;
+      const isDim = (!isOrigin && !isDestination) || (isRegionMode && !isInRegion);
+      const isHiddenInRegion = isRegionMode && !isInRegion;
+      // Names are shown for the selected origin and its links, for every port
+      // of the active region, and for every port once the user zooms in far
+      // enough that labels no longer collide.
+      const isLabeled = isOrigin || isDestination || (isRegionMode && isInRegion) || zoomLevel >= PORT_LABEL_ZOOM;
+
       const updatedPortIcon = divIcon({
-        className: `gacis-service-port-container ${viewMode !== 'hubs' ? 'is-service-hidden' : ''} ${isOrigin ? 'is-service-origin' : ''} ${isDestination ? 'is-service-destination' : ''}`,
+        className: `gacis-service-port-container ${viewMode !== 'hubs' ? 'is-service-hidden' : ''} ${isHiddenInRegion ? 'is-service-hidden' : ''} ${isOrigin ? 'is-service-origin' : ''} ${isDestination ? 'is-service-destination' : ''} ${isDim ? 'is-service-dim' : ''} ${isLabeled ? 'is-service-labeled' : ''} ${isRegionMode && isInRegion && !isOrigin ? 'is-service-region' : ''}`,
         html: `
           <button
             type="button"
             class="service-port-pin"
             aria-label="Open ${portName} service port"
-            title="${portName}"
+            title="${portFlag} ${portName}${portCode ? ' · ' + portCode : ''}"
           >
             <span class="service-port-pulse"></span>
             <span class="service-port-core"></span>
-            ${isOrigin || isDestination ? `
-              <span class="service-port-label">
-                <span>${isOrigin ? '◉' : '•'}</span>
-                <span>${portName}</span>
+            ${isRegionMode && isInRegion ? `
+              <span class="service-port-bearing" aria-hidden="true">
+                <span class="spb-sweep"></span>
+                <span class="spb-ring"></span>
+                <span class="spb-needle"></span>
               </span>
             ` : ''}
+            <span class="service-port-label">
+              ${portFlag ? `<span class="service-port-flag">${portFlag}</span>` : ''}
+              <span class="service-port-name">${portName}</span>
+              ${portCode ? `<small class="service-port-code">${portCode}</small>` : ''}
+              ${isOrigin ? '<span class="service-port-tag is-origin-tag">ORIGIN</span>' : ''}
+              ${isDestination ? '<span class="service-port-tag is-dest-tag">LINKED</span>' : ''}
+            </span>
           </button>
         `,
-        iconSize: [16, 16],
-        iconAnchor: [8, 8]
+        iconSize: [24, 24],
+        iconAnchor: [12, 12]
       });
       marker.setIcon(updatedPortIcon);
-      marker.setZIndexOffset(isOrigin ? 1300 : isDestination ? 1000 : 250);
+      marker.setZIndexOffset(isOrigin ? 1300 : isDestination ? 1000 : isLabeled ? 700 : 150);
     });
 
     // Remove connection-only markers from the previous selected port.
     Object.values(connectionMarkersRef.current).forEach(marker => map.removeLayer(marker));
     connectionMarkersRef.current = {};
 
-    if (viewMode === 'hubs' && activeServicePort?.name && activeServiceConnections.length > 0) {
+    // Per-port blue connection lines are skipped in region mode: the region
+    // mesh already draws every intra-region link, so drawing both would
+    // duplicate lines and re-clutter the map.
+    if (viewMode === 'hubs' && !isRegionMode && activeServicePort?.name && activeServiceConnections.length > 0) {
       const originCoords = SERVICE_PORT_COORDS[activeServicePort.name];
       if (originCoords) {
         activeServiceConnections.forEach((connection, index) => {
@@ -552,7 +1019,7 @@ export const RealGeographicMap = ({
 
             externalMarker.on('click', () => {
               const matching = servicePortNetwork
-                .flatMap(country => country.ports.map(port => ({ ...port, country: country.country, countryId: country.id, flag: country.flag })))
+                .flatMap(country => country.ports.map(port => ({ ...port, country: country.country, countryId: country.id, flag: country.flag, regionId: country.regionId })))
                 .find(port => resolveServicePortName(port.name) === canonical);
 
               if (matching) {
@@ -593,7 +1060,10 @@ export const RealGeographicMap = ({
       marker.setZIndexOffset(isSeaActive ? 1100 : 350);
     });
 
-  }, [activeHub, activeSeaDomain, activeServicePort, servicePortNetwork, viewMode, selectedLaneFilter, hoveredLaneId, onSelectServicePort]);
+    // Icons have just been rebuilt — drop any stacked name pills.
+    scheduleLabelCollisionCheck();
+
+  }, [activeHub, activeSeaDomain, activeServicePort, servicePortNetwork, viewMode, selectedLaneFilter, hoveredLaneId, onSelectServicePort, activeRegion, zoomLevel]);
 
   // Smooth flyTo when activeHub changes
   useEffect(() => {
@@ -664,6 +1134,9 @@ export const RealGeographicMap = ({
             : `MARITIME DOMAIN: ${activeSeaDomain?.name?.toUpperCase()}`
           }
         </span>
+        {viewMode === 'hubs' && zoomLevel < PORT_LABEL_ZOOM && (
+          <span className="gso-hint">ZOOM IN TO NAME ALL 152 PORTS</span>
+        )}
       </div>
 
       {/* GACIS Floating Map Controls */}

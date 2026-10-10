@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   Car, HeartPulse, Zap, Cpu, ShoppingBag, Factory, ShieldCheck,
@@ -12,12 +11,6 @@ import './Solutions.css';
 const iconMap = { Car, HeartPulse, Zap, Cpu, ShoppingBag, Factory, ShieldCheck };
 
 export const Solutions = () => {
-  const [activeFilter, setActiveFilter] = useState('ALL');
-
-  const filteredIndustries = activeFilter === 'ALL' 
-    ? industries 
-    : industries.filter(ind => ind.connectedServices.some(s => s.mode === activeFilter));
-
   return (
     <div className="solutions-page">
       <SEO 
@@ -47,34 +40,9 @@ export const Solutions = () => {
             </p>
           </div>
 
-          {/* Interactive Mode & Sector Filter Bar */}
-          <div className="solutions-filter-bar">
-            <span className="sfb-title">Filter by Logistics Mode:</span>
-            <div className="sfb-pills">
-              {[
-                { id: 'ALL', label: 'All Industries (7)' },
-                { id: 'AIR', label: 'Air Freight' },
-                { id: 'SEA', label: 'Ocean Freight' },
-                { id: 'RAIL', label: 'Rail & Intermodal' },
-                { id: 'ROAD', label: 'Road Transport' },
-                { id: 'PROJECT', label: 'Project Cargo' },
-                { id: 'HAZMAT', label: 'Hazmat & DG' }
-              ].map(tab => (
-                <button
-                  key={tab.id}
-                  type="button"
-                  className={`sfb-btn ${activeFilter === tab.id ? 'active' : ''}`}
-                  onClick={() => setActiveFilter(tab.id)}
-                >
-                  {tab.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
           {/* Industries Matrix Grid */}
           <div className="industries-matrix-grid">
-            {filteredIndustries.map((ind) => {
+            {industries.map((ind) => {
               const Icon = iconMap[ind.icon] || Factory;
 
               return (

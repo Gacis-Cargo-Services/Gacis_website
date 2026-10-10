@@ -205,6 +205,193 @@
   color: #e0f2fe;
 }
 
+/* ─── State: Region-Highlighted Hub ─── */
+.gacis-map-pin-container.pin-region-highlight {
+  transition: opacity 0.35s ease;
+}
+
+.clean-hub-pin.is-region-pin .pin-dot-core {
+  width: 13px;
+  height: 13px;
+  background: #f59e0b;
+  border: 2.5px solid #fef08a;
+  box-shadow: 0 0 14px rgba(245, 158, 11, 1), 0 0 6px #fef08a;
+  transform: scale(1.1);
+}
+
+.clean-hub-pin.is-region-pin .pin-radar-ring {
+  width: 30px;
+  height: 30px;
+  border: 1.5px solid rgba(245, 158, 11, 0.65);
+  background: rgba(245, 158, 11, 0.15);
+  animation: cleanRadarPing 2.4s infinite cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.clean-hub-pin.is-region-pin .pin-label-pill {
+  background: linear-gradient(135deg, rgba(120, 53, 15, 0.95) 0%, rgba(78, 40, 6, 0.95) 100%);
+  border-color: #f59e0b;
+  box-shadow: 0 4px 16px rgba(245, 158, 11, 0.55), 0 0 8px rgba(254, 240, 138, 0.3);
+}
+
+.clean-hub-pin.is-region-pin .plp-city {
+  color: #fef08a;
+  font-weight: 900;
+}
+
+/* ─── Region connection arc lines ─── */
+.region-connection-line,
+.region-connection-flow {
+  pointer-events: none;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   REGION PROXIMITY LANES
+   Each port links only to its nearest regional neighbours. Every pair is two
+   parallel lanes — one outbound (cyan, flows A→B) and one inbound (amber,
+   flows B→A) — so a single port shows one line leaving and one line arriving.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.region-lane,
+.region-lane-flow,
+.region-lane-arrow {
+  pointer-events: none;
+}
+
+/* Base lanes sit under the animated flow so the route stays legible. */
+.region-lane-out {
+  filter: drop-shadow(0 0 3px rgba(56, 189, 248, 0.4));
+}
+
+.region-lane-in {
+  filter: drop-shadow(0 0 3px rgba(245, 158, 11, 0.4));
+}
+
+/* Animated flow: dashes travel in the lane's own direction of travel because
+   each lane's points are already ordered the way the lane is drawn. */
+.region-lane-flow {
+  animation: regionLaneFlow 1.5s linear infinite;
+}
+
+.region-lane-flow-out {
+  filter: drop-shadow(0 0 5px rgba(125, 211, 252, 0.65));
+}
+
+.region-lane-flow-in {
+  filter: drop-shadow(0 0 5px rgba(254, 240, 138, 0.6));
+}
+
+@keyframes regionLaneFlow {
+  to {
+    stroke-dashoffset: -32;
+  }
+}
+
+/* ─── Lane direction arrowheads ─── */
+.region-lane-arrow {
+  background: transparent !important;
+  border: 0 !important;
+}
+
+.lane-arrow {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 0;
+  height: 0;
+  margin: -7px 0 0 -5px;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-bottom: 8px solid currentColor;
+  filter: drop-shadow(0 0 4px currentColor);
+}
+
+.lane-arrow-out {
+  color: #7dd3fc;
+}
+
+.lane-arrow-in {
+  color: #fcd34d;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   PORT BEARING INSTRUMENT
+   Ports in the highlighted region carry a rotating compass sweep plus a
+   wobbling heading needle, reading as a bearing station instead of a flat dot.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.service-port-bearing {
+  position: absolute;
+  inset: -7px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Rotating radar sweep — the "bearing" spin */
+.service-port-bearing .spb-sweep {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid rgba(245, 158, 11, 0.8);
+  border-top-color: rgba(245, 158, 11, 0.05);
+  border-right-color: rgba(245, 158, 11, 0.25);
+  animation: spbSweep 3.4s linear infinite;
+}
+
+/* Dashed outer compass ring, counter-rotating slowly */
+.service-port-bearing .spb-ring {
+  position: absolute;
+  inset: -5px;
+  border-radius: 50%;
+  border: 1px dashed rgba(245, 158, 11, 0.45);
+  animation: spbSweep 14s linear infinite reverse;
+}
+
+/* Heading needle, swinging through a bearing arc */
+.service-port-bearing .spb-needle {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 2px;
+  height: 20px;
+  margin: -10px 0 0 -1px;
+  border-radius: 1px;
+  background: linear-gradient(to bottom,
+    rgba(253, 224, 71, 1) 0%,
+    rgba(245, 158, 11, 1) 46%,
+    rgba(245, 158, 11, 0) 46%,
+    rgba(245, 158, 11, 0) 100%);
+  animation: spbNeedle 4.4s ease-in-out infinite;
+}
+
+/* The selected origin keeps the region bearing but in the origin accent */
+.gacis-service-port-container.is-service-origin .service-port-bearing .spb-sweep {
+  border-color: rgba(255, 215, 0, 0.85);
+  border-top-color: rgba(255, 215, 0, 0.05);
+  border-right-color: rgba(255, 215, 0, 0.3);
+}
+
+.gacis-service-port-container.is-service-origin .service-port-bearing .spb-ring {
+  border-color: rgba(255, 215, 0, 0.45);
+}
+
+.gacis-service-port-container.is-service-origin .service-port-bearing .spb-needle {
+  background: linear-gradient(to bottom,
+    rgba(255, 215, 0, 1) 0%,
+    rgba(200, 32, 47, 1) 46%,
+    rgba(200, 32, 47, 0) 46%,
+    rgba(200, 32, 47, 0) 100%);
+}
+
+@keyframes spbSweep {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes spbNeedle {
+  0%, 100% { transform: rotate(-42deg); }
+  50% { transform: rotate(46deg); }
+}
+
 /* ─── Dubai HQ Special Anchor ─── */
 .clean-hub-pin.is-dubai-hq:not(.is-origin-pin) .pin-dot-core {
   border-color: #ffd700;
@@ -486,6 +673,24 @@
   transition: all 0.25s ease;
 }
 
+/* Subtle prompt telling the user port names appear on zoom */
+.gso-hint {
+  font-size: 0.58rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  color: #fef08a;
+  padding-left: 0.7rem;
+  margin-left: 0.1rem;
+  border-left: 1px solid rgba(255, 255, 255, 0.2);
+  white-space: nowrap;
+  animation: gsoHintFade 3.2s ease-in-out infinite;
+}
+
+@keyframes gsoHintFade {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
+}
+
 .gso-dot {
   width: 7px;
   height: 7px;
@@ -717,6 +922,12 @@
     padding: 0.35rem 0.7rem;
     top: 10px;
     left: 10px;
+    max-width: calc(100% - 20px);
+  }
+
+  /* Drop the zoom hint on mobile — no room for it */
+  .gso-hint {
+    display: none;
   }
   
   .gso-dot {
@@ -839,16 +1050,41 @@
   display: none !important;
 }
 
+/* Ports outside the current origin/connection selection recede to a small,
+   faint dot so the 152-port directory doesn't visually stack on top of the
+   14 hub pins (and on top of each other) at low zoom. Still fully clickable
+   and un-dims on hover/focus so the full directory stays discoverable. */
+.gacis-service-port-container.is-service-dim .service-port-core {
+  width: 8px;
+  height: 8px;
+  opacity: 0.62;
+  border-width: 2px;
+  box-shadow: 0 0 5px rgba(56,189,248,0.5);
+}
+
+.gacis-service-port-container.is-service-dim .service-port-pulse {
+  display: none;
+}
+
+.gacis-service-port-container.is-service-dim .service-port-pin:hover .service-port-core,
+.gacis-service-port-container.is-service-dim .service-port-pin:focus-visible .service-port-core {
+  opacity: 1;
+  transform: scale(1.6);
+}
+
 .gacis-service-port-container {
   background: transparent !important;
   border: 0 !important;
   overflow: visible !important;
 }
 
+/* Generous hit area: the button box is what receives the click, so even
+   though only the small core is visible, the whole 26px square is tappable.
+   Sized for comfortable clicking (40+ audience) on desktop and on touch. */
 .service-port-pin {
   position: relative;
-  width: 16px;
-  height: 16px;
+  width: 26px;
+  height: 26px;
   padding: 0;
   margin: 0;
   border: 0;
@@ -861,22 +1097,31 @@
   font: inherit;
 }
 
+/* Dimmed (unlabelled) ports sit cheek-by-jowl at world zoom, so keep their
+   hit area tight to avoid stealing clicks from a neighbouring port. They
+   still enlarge on hover/focus before the user commits to a click. */
+.gacis-service-port-container.is-service-dim .service-port-pin {
+  width: 15px;
+  height: 15px;
+}
+
+/* Larger, higher-contrast core dot */
 .service-port-core {
   position: relative;
-  width: 7px;
-  height: 7px;
+  width: 11px;
+  height: 11px;
   border-radius: 50%;
   background: #38bdf8;
-  border: 1.5px solid rgba(255,255,255,0.95);
-  box-shadow: 0 0 8px rgba(56,189,248,0.85);
+  border: 2px solid rgba(255,255,255,0.98);
+  box-shadow: 0 0 10px rgba(56,189,248,0.9);
   z-index: 3;
   transition: transform 180ms ease, background 180ms ease, box-shadow 180ms ease;
 }
 
 .service-port-pulse {
   position: absolute;
-  width: 15px;
-  height: 15px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
   border: 1px solid rgba(56,189,248,0.35);
   background: rgba(56,189,248,0.08);
@@ -887,23 +1132,23 @@
 .service-port-label {
   position: absolute;
   left: 50%;
-  bottom: 13px;
+  bottom: 24px;
   transform: translateX(-50%) translateY(3px);
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
   min-width: max-content;
-  max-width: 220px;
-  padding: 4px 7px;
-  border: 1px solid rgba(56,189,248,0.35);
+  max-width: 260px;
+  padding: 5px 9px;
+  border: 1px solid rgba(56,189,248,0.5);
   border-radius: 6px;
-  background: rgba(6, 13, 22, 0.94);
+  background: rgba(6, 13, 22, 0.96);
   backdrop-filter: blur(10px);
   box-shadow: 0 8px 18px rgba(0,0,0,0.5);
   color: #e0f2fe;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 800;
-  line-height: 1.15;
+  line-height: 1.2;
   white-space: nowrap;
   pointer-events: none;
   opacity: 0;
@@ -911,20 +1156,178 @@
   z-index: 20;
 }
 
+/* Country flag inside a port name pill */
+.service-port-label .service-port-flag {
+  font-size: 14px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+/* The port name itself — high-contrast so it is readable at a glance */
+.service-port-label .service-port-name {
+  color: #ffffff;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+}
+
+.service-port-label .service-port-code {
+  color: #7dd3fc;
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  padding: 1px 4px;
+  border-radius: 3px;
+  background: rgba(56,189,248,0.16);
+  flex-shrink: 0;
+}
+
+/* Small role tag appended to origin / linked ports */
+.service-port-label .service-port-tag {
+  font-size: 8.5px;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  padding: 1px 5px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.service-port-label .service-port-tag.is-origin-tag {
+  color: #ffd700;
+  background: rgba(200,32,47,0.4);
+  border: 1px solid rgba(255,215,0,0.6);
+}
+
+.service-port-label .service-port-tag.is-dest-tag {
+  color: #7dd3fc;
+  background: rgba(2,132,199,0.35);
+  border: 1px solid rgba(125,211,252,0.5);
+}
+
 .service-port-label small {
   color: #94a3b8;
-  font-size: 8px;
+  font-size: 9.5px;
   font-weight: 700;
   letter-spacing: 0.04em;
 }
 
+/* Names stay visible for the active region, for the selected origin and its
+   links, and once the user zooms in past the readability threshold. */
 .service-port-pin:hover .service-port-label,
 .service-port-pin:focus-visible .service-port-label,
 .gacis-service-port-container.is-service-origin .service-port-label,
 .gacis-service-port-container.is-service-destination .service-port-label,
+.gacis-service-port-container.is-service-labeled .service-port-label,
 .gacis-service-port-container.connection-only .service-port-label {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
+}
+
+/* Origin / destination labelling gets a stronger pill treatment */
+.gacis-service-port-container.is-service-origin .service-port-label {
+  border-color: rgba(255,215,0,0.75);
+  background: rgba(60, 10, 14, 0.96);
+  box-shadow: 0 8px 20px rgba(200,32,47,0.45), 0 0 10px rgba(255,215,0,0.25);
+}
+
+.gacis-service-port-container.is-service-destination .service-port-label {
+  border-color: rgba(125,211,252,0.65);
+  background: rgba(6, 26, 42, 0.96);
+}
+
+/* ─── Region highlight ───
+   Ports inside the selected region take the region accent (amber/gold),
+   distinct from the red origin and cyan link colours, so the highlighted
+   region reads as its own colour band. */
+.gacis-service-port-container.is-service-region .service-port-core {
+  background: #f59e0b;
+  border-color: #fef08a;
+  box-shadow: 0 0 10px rgba(245,158,11,0.9);
+}
+
+.gacis-service-port-container.is-service-region .service-port-pulse {
+  border-color: rgba(245,158,11,0.45);
+  background: rgba(245,158,11,0.1);
+}
+
+.gacis-service-port-container.is-service-region .service-port-label {
+  border-color: rgba(245,158,11,0.6);
+  background: rgba(38, 23, 5, 0.96);
+  color: #fef3c7;
+}
+
+.gacis-service-port-container.is-service-region .service-port-name {
+  color: #fef08a;
+}
+
+.gacis-service-port-container.is-service-region .service-port-code {
+  color: #fcd34d;
+  background: rgba(245,158,11,0.18);
+}
+
+/* ─── Collision resolution ───
+   Ports that share a location (Lagos/Tin Can Island, Kobe/Osaka, the UAE
+   gateways …) and hub cities that are also ports (Port Klang, Singapore,
+   Hamburg, Durban …) would stack their name pills on one spot. Every label is
+   now measured and nudged to the free side of its pin; only a label with no
+   free side at all is hidden, and hover/focus still reveals it. */
+
+/* Flipped to the opposite side of the pin. Transitions are disabled here so
+   the collision resolver can measure the flipped rect exactly rather than
+   part-way through an animation. `!important` keeps the flipped position
+   winning over the origin/destination/hover visibility rules, which also set
+   a transform but must never move the label back across the pin. */
+.service-port-label.is-label-below {
+  bottom: auto !important;
+  top: 26px !important;
+  transform: translateX(-50%) translateY(-3px) !important;
+  transition: none;
+}
+
+.pin-label-pill.is-label-below {
+  bottom: auto;
+  top: 26px;
+  transform: translateX(-50%);
+  transition: none;
+  animation: none;
+}
+
+/* Sea domain pills default to below, so their spare side is above */
+.sea-label-pill.is-label-above {
+  top: auto;
+  bottom: 26px;
+  transform: translateX(-50%);
+  transition: none;
+  animation: none;
+}
+
+/* Hidden only when both sides are already taken */
+.service-port-label.is-label-collided,
+.pin-label-pill.is-label-collided,
+.sea-label-pill.is-label-collided {
+  opacity: 0;
+}
+
+.service-port-label.is-label-collided {
+  transform: translateX(-50%) translateY(6px);
+}
+
+.service-port-label.is-label-collided.is-label-below {
+  transform: translateX(-50%) translateY(-6px) !important;
+}
+
+/* Hover/focus always reveals a hidden label */
+.service-port-pin:hover .service-port-label,
+.service-port-pin:focus-visible .service-port-label {
+  opacity: 1;
+}
+
+/* Hub and sea pills are not interactive themselves, so reveal them from the
+   marker container's hover/focus as well */
+.clean-hub-pin:hover .pin-label-pill,
+.clean-hub-pin:focus-visible .pin-label-pill,
+.clean-sea-beacon:hover .sea-label-pill,
+.clean-sea-beacon:focus-visible .sea-label-pill {
+  opacity: 1 !important;
 }
 
 .service-port-pin:hover .service-port-core,
@@ -935,32 +1338,52 @@
   box-shadow: 0 0 13px rgba(255,215,0,0.95);
 }
 
+/* Selected origin — largest, unmistakable */
 .gacis-service-port-container.is-service-origin .service-port-core {
-  width: 11px;
-  height: 11px;
+  width: 15px;
+  height: 15px;
   background: #c8202f;
-  border: 2px solid #ffd700;
-  box-shadow: 0 0 15px rgba(200,32,47,0.95), 0 0 7px rgba(255,215,0,0.85);
+  border: 3px solid #ffd700;
+  box-shadow: 0 0 18px rgba(200,32,47,0.95), 0 0 9px rgba(255,215,0,0.9);
 }
 
 .gacis-service-port-container.is-service-origin .service-port-pulse {
-  width: 27px;
-  height: 27px;
+  width: 34px;
+  height: 34px;
   border-color: rgba(255,215,0,0.8);
   background: rgba(200,32,47,0.16);
   animation: servicePortRadar 1.8s infinite ease-out;
 }
 
+/* Linked destinations — clearly bigger than idle ports */
 .gacis-service-port-container.is-service-destination .service-port-core {
+  width: 14px;
+  height: 14px;
   background: #0284c7;
   border-color: #7dd3fc;
-  box-shadow: 0 0 12px rgba(56,189,248,1);
+  border-width: 2px;
+  box-shadow: 0 0 14px rgba(56,189,248,1);
 }
 
 .gacis-service-port-container.is-service-destination .service-port-pulse {
-  width: 21px;
-  height: 21px;
+  width: 26px;
+  height: 26px;
   border-color: rgba(56,189,248,0.6);
+}
+
+/* Region ports — amber accent, comfortably sized */
+.gacis-service-port-container.is-service-region .service-port-core {
+  width: 13px;
+  height: 13px;
+  background: #f59e0b;
+  border-color: #fef08a;
+  border-width: 2px;
+  box-shadow: 0 0 12px rgba(245,158,11,0.9);
+}
+
+.gacis-service-port-container.is-service-region .service-port-pulse {
+  border-color: rgba(245,158,11,0.45);
+  background: rgba(245,158,11,0.1);
 }
 
 .service-port-pin.is-external-destination .service-port-core {
@@ -1011,9 +1434,10 @@
 
 @media (max-width: 768px) {
   .service-port-label {
-    font-size: 9px;
-    max-width: 180px;
-    padding: 3px 6px;
+    font-size: 11px;
+    max-width: 200px;
+    padding: 4px 7px;
+    bottom: 22px;
   }
 
   .service-port-label small {
@@ -1024,12 +1448,45 @@
     width: 6px;
     height: 6px;
   }
+
+  /* Slimmer bearing instrument so it does not swamp small screens */
+  .service-port-bearing {
+    inset: -6px;
+  }
+
+  .service-port-bearing .spb-needle {
+    height: 13px;
+  }
+
+  .lane-arrow {
+    border-left-width: 4px;
+    border-right-width: 4px;
+    border-bottom-width: 7px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .service-port-connection-line,
   .gacis-service-port-container.is-service-origin .service-port-pulse {
     animation: none;
+  }
+
+  /* Lanes, arrowheads and bearing instruments keep their layout but stop
+     spinning/swinging when the user asks for reduced motion. */
+  .region-lane-flow,
+  .service-port-bearing .spb-sweep,
+  .service-port-bearing .spb-ring,
+  .service-port-bearing .spb-needle {
+    animation: none;
+  }
+
+  /* Direction is still readable: static dashes plus arrowheads. */
+  .region-lane-flow {
+    opacity: 0.75;
+  }
+
+  .service-port-bearing .spb-needle {
+    transform: rotate(0deg);
   }
 
   .service-port-label,

@@ -67,7 +67,7 @@ export const ServiceStrip = () => {
         {/* Bottom Banner */}
         <div className="service-strip-cta-banner fade-up">
           <div className="ssc-text">
-            <h4>Need a specialized combination of Air, Sea, and Rail?</h4>
+            <h4>Need a specialized combination of Air, Sea, and Road?</h4>
             <p>Our trade lane engineers design bespoke hybrid corridors tailored to your inventory holding velocity.</p>
           </div>
           <Link to="/quote" className="btn btn-primary">

@@ -10,7 +10,6 @@ import LazyOnVisible from '../../components/Common/LazyOnVisible';
 import SEO from '../../components/Common/SEO';
 import './Home.css';
 
-const RouteSimulator = lazy(() => import('../../components/Home/RouteSimulator'));
 const IndustrySection = lazy(() => import('../../components/Home/IndustrySection'));
 const SocialProof = lazy(() => import('../../components/Home/SocialProof'));
 const Testimonials = lazy(() => import('../../components/Home/Testimonials'));
@@ -31,13 +30,6 @@ const Home = () => {
       <TrustStats />
       <Differentiators />
       <ProcessSection />
-      <LazyOnVisible minHeight={640}>
-        <ErrorBoundary componentName="Route Simulator">
-          <Suspense fallback={null}>
-            <RouteSimulator />
-          </Suspense>
-        </ErrorBoundary>
-      </LazyOnVisible>
       <LazyOnVisible minHeight={420}>
         <Suspense fallback={null}>
           <IndustrySection />

@@ -11,7 +11,6 @@ const timeZones = [
   { label: 'Sri Lanka', zone: 'Asia/Colombo' },
   { label: 'Malaysia', zone: 'Asia/Kuala_Lumpur' },
   { label: 'UAE', zone: 'Asia/Dubai' },
-  { label: 'Azerbaijan', zone: 'Asia/Baku' },
   { label: 'Russia', zone: 'Europe/Moscow' },
   { label: 'China', zone: 'Asia/Shanghai' },
   { label: 'USA', zone: 'America/New_York' },
@@ -95,7 +94,7 @@ export const Hero = ({ videoSrc, videoPoster }) => {
 
             <div className="hero-route-heading">
               <span className="hero-eyebrow">Strategic Freight Corridors</span>
-              <span className="hero-corridor-tag">Asia ↔ Africa ↔ Europe ↔ North America ↔ South America</span>
+              <span className="hero-corridor-tag">Far East ↔ Asia ↔ Central Asia ↔ Europe ↔ Africa ↔ North America ↔ South America</span>
             </div>
 
             <h1 className="hero-headline">

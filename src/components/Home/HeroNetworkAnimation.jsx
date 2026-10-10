@@ -238,11 +238,9 @@ export const HeroNetworkAnimation = () => {
             title={isPaused ? 'Resume' : 'Pause'}
           >
             {isPaused ? <Play size={11} /> : <Pause size={11} />}
-            <span>{isPaused ? 'PAUSED' : 'LIVE'}</span>
           </button>
           <div className="hnc-status-badge">
             <Activity size={13} className={`pulse-icon${isPaused ? ' stopped' : ''}`} />
-            <span>{isPaused ? 'PAUSED' : 'CYCLE: 3.5s'}</span>
           </div>
         </div>
       </div>
