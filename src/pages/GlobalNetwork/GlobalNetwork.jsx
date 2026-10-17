@@ -947,6 +947,15 @@ export const GlobalNetwork = () => {
                   <div className="dossier-tab-content">
                     <div className="contact-landscape-grid">
                       <div className="gdc-address-box contact-col">
+                        {activeHub.companyName && (
+                          <div className="gab-row">
+                            <Building2 size={16} className="gab-icon" />
+                            <div>
+                              <strong className="gab-label">LEGAL ENTITY:</strong>
+                              <p>{activeHub.companyName}</p>
+                            </div>
+                          </div>
+                        )}
                         <div className="gab-row">
                           <MapPin size={16} className="gab-icon" />
                           <div>
@@ -958,16 +967,56 @@ export const GlobalNetwork = () => {
                           <Phone size={16} className="gab-icon" />
                           <div>
                             <strong className="gab-label">DIRECT DESK LINE:</strong>
-                            <a href={`tel:${activeHub.phone}`}>{activeHub.phone}</a>
+                            <a href={`tel:${activeHub.phone.replace(/\s+/g, '')}`}>{activeHub.phone}</a>
+                            {activeHub.additionalPhone && (
+                              <span> / <a href={`tel:${activeHub.additionalPhone.replace(/\s+/g, '')}`}>{activeHub.additionalPhone}</a></span>
+                            )}
                           </div>
                         </div>
-                        <div className="gab-row">
-                          <Mail size={16} className="gab-icon" />
-                          <div>
-                            <strong className="gab-label">COMMERCIAL EMAIL:</strong>
-                            <a href={`mailto:${activeHub.email}`}>{activeHub.email}</a>
+                        {activeHub.contactPerson && (
+                          <div className="gab-row">
+                            <span className="gab-icon" style={{ display: 'inline-flex', fontSize: '14px', lineHeight: 1 }} aria-hidden="true">👤</span>
+                            <div>
+                              <strong className="gab-label">CONTACT PERSON:</strong>
+                              <p>{activeHub.contactPerson}</p>
+                            </div>
                           </div>
-                        </div>
+                        )}
+                        {activeHub.contacts && (
+                          <div className="gab-row">
+                            <span className="gab-icon" style={{ display: 'inline-flex', fontSize: '14px', lineHeight: 1 }} aria-hidden="true">👥</span>
+                            <div>
+                              <strong className="gab-label">DESIGNATED CONTACTS:</strong>
+                              {activeHub.contacts.map((c, ci) => (
+                                <p key={ci}>
+                                  <strong>{c.name}:</strong>{' '}
+                                  <a href={`tel:${c.mobile.replace(/\s+/g, '')}`}>{c.mobile}</a>
+                                  {c.email && (
+                                    <> · <a href={`mailto:${c.email}`}>{c.email}</a></>
+                                  )}
+                                </p>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        {activeHub.website && (
+                          <div className="gab-row">
+                            <Globe2 size={16} className="gab-icon" />
+                            <div>
+                              <strong className="gab-label">WEBSITE:</strong>
+                              <a href={activeHub.website} target="_blank" rel="noopener noreferrer">{activeHub.website}</a>
+                            </div>
+                          </div>
+                        )}
+                        {activeHub.email && (
+                          <div className="gab-row">
+                            <Mail size={16} className="gab-icon" />
+                            <div>
+                              <strong className="gab-label">COMMERCIAL EMAIL:</strong>
+                              <a href={`mailto:${activeHub.email}`}>{activeHub.email}</a>
+                            </div>
+                          </div>
+                        )}
                       </div>
                       <div className="desk-service-hours contact-col">
                         <div className="dsh-item">

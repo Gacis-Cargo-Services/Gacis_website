@@ -35,9 +35,10 @@ export const SEO = ({
           { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Customs Brokerage & Trade Compliance' } }
         ]
       },
+      telephone: '+91 44 4978 9158',
       address: {
         '@type': 'PostalAddress',
-        streetAddress: 'Akshaya Plaza',
+        streetAddress: '1st Floor, No. 55, Adhithanar Salai (Formerly Harris Road), Akshaya Plaza, Pudupet',
         addressLocality: 'Chennai',
         addressRegion: 'Tamil Nadu',
         postalCode: '600002',

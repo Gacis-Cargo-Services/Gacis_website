@@ -1,41 +1,17 @@
 import { useState } from 'react';
-import { Mail, MapPin, Phone, Building2, Send, CheckCircle, Clock, Headphones, ExternalLink, Navigation } from 'lucide-react';
-import { primaryHubs } from '../../data/locations';
+import { 
+  Mail, MapPin, Phone, Building2, Send, CheckCircle, Clock, 
+  Headphones, ExternalLink, Navigation, Globe, User, ShieldCheck, MapPinned 
+} from 'lucide-react';
+import { officialOffices, headOffice, globalOffices } from '../../data/offices';
 import useFormSubmit from '../../hooks/useFormSubmit';
 import SEO from '../../components/Common/SEO';
 import PageHeader from '../../components/Common/PageHeader';
 import './Contact.css';
 
-const officeLocations = [
-  {
-    id: 'chennai',
-    name: 'GACIS Corporate Headquarters',
-    city: 'Chennai, Tamil Nadu',
-    country: 'India',
-    address: 'Akshaya Plaza, Chennai, Tamil Nadu 600002, India',
-    phone: '+91 44 2855 9100 / WhatsApp Desk Available',
-    email: 'pricing.in@gaciscargoservices.com',
-    hours: 'Mon – Sat: 09:00 – 18:30 IST',
-    mapUrl: 'https://maps.google.com/maps?q=Akshaya+Plaza,+Adithanar+Salai,+Chennai,+Tamil+Nadu+600002&z=16&output=embed',
-    directionsUrl: 'https://share.google/754b8XIlZwA8JegC5'
-  },
-  {
-    id: 'dubai',
-    name: 'Dubai Regional Trade Operations',
-    city: 'Dubai (Gulf Gateway)',
-    country: 'United Arab Emirates',
-    address: 'GACIS Regional Trade Operations, Dubai, United Arab Emirates',
-    phone: '+971 4 397 7888 / Commercial Desk',
-    email: 'dubai.hq@gaciscargoservices.com',
-    hours: '24/7 Global Central Control Tower',
-    mapUrl: 'https://maps.google.com/maps?q=Dubai,United+Arab+Emirates&z=12&output=embed',
-    directionsUrl: 'https://maps.google.com/?q=Dubai,United+Arab+Emirates'
-  }
-];
-
 export const Contact = () => {
   const [activeOfficeId, setActiveOfficeId] = useState('chennai');
-  const activeOffice = officeLocations.find(o => o.id === activeOfficeId) || officeLocations[0];
+  const activeOffice = officialOffices.find(o => o.id === activeOfficeId) || officialOffices[0];
 
   const {
     formData,
@@ -48,6 +24,7 @@ export const Contact = () => {
     submit,
     reset
   } = useFormSubmit({
+    endpoint: import.meta.env.VITE_CONTACT_ENDPOINT || null,
     defaultValues: {
       name: '',
       email: '',
@@ -67,11 +44,19 @@ export const Contact = () => {
     });
   };
 
+  const handleSelectMapOffice = (officeId) => {
+    setActiveOfficeId(officeId);
+    const mapEl = document.getElementById('office-locations-map');
+    if (mapEl) {
+      mapEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  };
+
   return (
     <div className="contact-page">
       <SEO 
-        title="Contact GACIS Global Logistics Desk"
-        description="Connect with GACIS trade lane specialists in Chennai (Tamil Nadu, India) and Dubai (UAE) for international corridor rates and logistics operations."
+        title="Contact GACIS Global Logistics Desk — Head Office & Global Offices"
+        description="Connect with GACIS trade lane specialists. Official offices in Chennai (Head Office, India), Klang (Malaysia), Colombo (Sri Lanka), Dubai (UAE), and Mumbai (India)."
         canonical="/contact"
       />
 
@@ -156,7 +141,7 @@ export const Contact = () => {
                         <input 
                           id="contact-phone"
                           type="tel" 
-                          placeholder="+91 98841 55555"
+                          placeholder="+91 99628 41182"
                           value={formData.phone}
                           onChange={e => updateField('phone', e.target.value)}
                         />
@@ -207,81 +192,250 @@ export const Contact = () => {
                       {errors.message && <span className="field-error-msg">{errors.message}</span>}
                     </div>
 
-<button 
-  type="submit" 
-  className="btn btn-primary btn-large btn-block"
-  disabled={isSubmitting}
-  aria-label={isSubmitting ? 'Transmitting dispatch request' : 'Send operational message'}
->
-  {isSubmitting ? 'Transmitting Dispatch...' : 'Send Operational Message'} <Send size={15} />
-</button>
+                    <button 
+                      type="submit" 
+                      className="btn btn-primary btn-large btn-block"
+                      disabled={isSubmitting}
+                      aria-label={isSubmitting ? 'Transmitting dispatch request' : 'Send operational message'}
+                    >
+                      {isSubmitting ? 'Transmitting Dispatch...' : 'Send Operational Message'} <Send size={15} />
+                    </button>
                   </form>
                 )}
               </div>
             </div>
 
-            {/* Right: Global Operational Hubs & Partner Network List */}
+            {/* Right: Official Offices Directory (Head Office + Global Offices) */}
             <div className="contact-hubs-column">
               <div className="chc-header">
-                <span className="eyebrow">GLOBAL OPERATING NETWORK</span>
-                <h2>Operating Desks & Partner Gateways</h2>
-                <p>Directly managed regional operating desks and international partner port pairs.</p>
+                <span className="eyebrow">OFFICIAL DIRECTORY</span>
+                <h2>Office Addresses &amp; Contacts</h2>
+                <p>Official corporate headquarters and international operating desks.</p>
               </div>
 
               <div className="hubs-scroll-list">
-                {primaryHubs.filter(hub => !['cis-almaty', 'tashkent-hub', 'frankfurt-hub', 'london-hub', 'hamburg-hub', 'klang-hub', 'riyadh-hub', 'istanbul-hub', 'baku-hub', 'singapore-hub'].includes(hub.id)).map((hub) => (
-                  <div className="hub-contact-card" key={hub.id}>
+                
+                {/* ── 01. CHENNAI HEAD OFFICE (PROMINENTLY DISPLAYED) ── */}
+                {headOffice && (
+                  <div className="hub-contact-card office-card-head" key={headOffice.id}>
+                    <div className="office-card-header-bar">
+                      <span className="office-status-badge head-office-tag">
+                        <ShieldCheck size={12} /> HEAD OFFICE
+                      </span>
+                      <button 
+                        type="button" 
+                        className="office-map-pin-btn"
+                        onClick={() => handleSelectMapOffice(headOffice.id)}
+                        title="View on Map"
+                        aria-label="View Chennai Head Office on Map"
+                      >
+                        <MapPinned size={14} /> Map
+                      </button>
+                    </div>
+
                     <div className="hcc-top">
-                      <span className="hcc-flag">{hub.flag}</span>
-                      <div>
-                        <span className="hcc-role">{hub.role}</span>
-                        <h4>{hub.country} — {hub.city}</h4>
+                      <span className="hcc-flag" aria-hidden="true">{headOffice.flag}</span>
+                      <div className="hcc-titles">
+                        <span className="hcc-country-tag">{headOffice.country} — {headOffice.city}</span>
+                        <h4 className="office-entity-name">{headOffice.name}</h4>
                       </div>
                     </div>
 
                     <div className="hcc-info-rows">
-                      <div className="hcc-row">
-                        <MapPin size={15} className="hcc-icon" />
-                        <span>{hub.address}</span>
+                      {/* Hierarchy Step 1: Complete Postal Address */}
+                      <div className="hcc-row address-row">
+                        <MapPin size={16} className="hcc-icon" aria-hidden="true" />
+                        <div className="hcc-text-block">
+                          <strong className="hcc-field-label">Postal Address:</strong>
+                          <div className="hcc-address-lines">
+                            {headOffice.addressLines.map((line, idx) => (
+                              <span key={idx}>{line}</span>
+                            ))}
+                          </div>
+                        </div>
                       </div>
-                      <div className="hcc-row">
-                        <Phone size={15} className="hcc-icon" />
-                        {hub.phone.startsWith('+') ? (
-                          <a href={`tel:${hub.phone.replace(/\s+/g, '')}`}>{hub.phone}</a>
-                        ) : (
-                          <span>{hub.phone}</span>
-                        )}
+
+                      {/* Hierarchy Step 2: Telephone and Mobile Contacts */}
+                      <div className="hcc-row phone-row">
+                        <Phone size={16} className="hcc-icon" aria-hidden="true" />
+                        <div className="hcc-text-block">
+                          <strong className="hcc-field-label">Telephone &amp; Mobile:</strong>
+                          <div className="hcc-phone-list">
+                            {headOffice.phones.map((phone, pIdx) => (
+                              <span key={pIdx} className="phone-item">
+                                <span className="phone-label">{phone.label}:</span>{' '}
+                                <a href={`tel:${phone.tel}`} className="contact-link phone-link">
+                                  {phone.number}
+                                </a>
+                              </span>
+                            ))}
+                          </div>
+                        </div>
                       </div>
-                      <div className="hcc-row">
-                        <Mail size={15} className="hcc-icon" />
-                        <a href={`mailto:${hub.email}`}>{hub.email}</a>
+
+                      {/* Hierarchy Step 3: Contact Person */}
+                      <div className="hcc-row contact-person-row">
+                        <User size={16} className="hcc-icon" aria-hidden="true" />
+                        <div className="hcc-text-block">
+                          <strong className="hcc-field-label">Contact Person:</strong>
+                          <span className="person-name">{headOffice.contacts[0].name}</span>
+                        </div>
                       </div>
                     </div>
                   </div>
-                ))}
+                )}
+
+                {/* ── 02. OUR GLOBAL OFFICES SECTION ── */}
+                <div className="global-offices-subgroup">
+                  <div className="global-offices-divider">
+                    <span className="god-eyebrow">INTERNATIONAL NETWORK</span>
+                    <h3 className="god-title">Our Global Offices</h3>
+                  </div>
+
+                  <div className="global-offices-cards-list">
+                    {globalOffices.map((office) => (
+                      <div className="hub-contact-card office-card-global" key={office.id}>
+                        <div className="office-card-header-bar">
+                          <span className="office-status-badge global-office-tag">
+                            GLOBAL OFFICE
+                          </span>
+                          <button 
+                            type="button" 
+                            className="office-map-pin-btn"
+                            onClick={() => handleSelectMapOffice(office.id)}
+                            title={`View ${office.city} on Map`}
+                            aria-label={`View ${office.city} on Map`}
+                          >
+                            <MapPinned size={14} /> Map
+                          </button>
+                        </div>
+
+                        <div className="hcc-top">
+                          <span className="hcc-flag" aria-hidden="true">{office.flag}</span>
+                          <div className="hcc-titles">
+                            <span className="hcc-country-tag">{office.country} — {office.city}</span>
+                            <h4 className="office-entity-name">{office.name}</h4>
+                          </div>
+                        </div>
+
+                        <div className="hcc-info-rows">
+                          {/* Hierarchy Step 1: Complete Postal Address */}
+                          <div className="hcc-row address-row">
+                            <MapPin size={16} className="hcc-icon" aria-hidden="true" />
+                            <div className="hcc-text-block">
+                              <strong className="hcc-field-label">Postal Address:</strong>
+                              <div className="hcc-address-lines">
+                                {office.addressLines.map((line, idx) => (
+                                  <span key={idx}>{line}</span>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Hierarchy Step 2: Telephone and Mobile Contacts */}
+                          {office.phones.length > 0 && (
+                            <div className="hcc-row phone-row">
+                              <Phone size={16} className="hcc-icon" aria-hidden="true" />
+                              <div className="hcc-text-block">
+                                <strong className="hcc-field-label">Telephone &amp; Mobile:</strong>
+                                <div className="hcc-phone-list">
+                                  {office.phones.map((phone, pIdx) => (
+                                    <span key={pIdx} className="phone-item">
+                                      <span className="phone-label">{phone.label}:</span>{' '}
+                                      <a href={`tel:${phone.tel}`} className="contact-link phone-link">
+                                        {phone.number}
+                                      </a>
+                                    </span>
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Hierarchy Step 3: Contact Person(s) */}
+                          {office.contacts && office.contacts.length > 0 && (
+                            <div className="hcc-row contact-person-row">
+                              <User size={16} className="hcc-icon" aria-hidden="true" />
+                              <div className="hcc-text-block">
+                                <strong className="hcc-field-label">
+                                  {office.contacts.length > 1 ? 'Designated Contacts:' : 'Contact Person:'}
+                                </strong>
+                                <div className="contacts-multiline">
+                                  {office.contacts.map((c, cIdx) => (
+                                    <div key={cIdx} className="contact-person-entry">
+                                      <span className="person-name"><strong>{c.name}</strong></span>
+                                      {c.mobile && (
+                                        <span className="person-mobile">
+                                          <Phone size={11} className="inline-icon" />{' '}
+                                          <a href={`tel:${c.tel}`} className="contact-link">
+                                            {c.mobile}
+                                          </a>
+                                        </span>
+                                      )}
+                                      {c.email && (
+                                        <span className="person-email">
+                                          <Mail size={11} className="inline-icon" />{' '}
+                                          <a href={`mailto:${c.email}`} className="contact-link email-link">
+                                            {c.email}
+                                          </a>
+                                        </span>
+                                      )}
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Hierarchy Step 4: Website link where supplied */}
+                          {office.website && (
+                            <div className="hcc-row website-row">
+                              <Globe size={16} className="hcc-icon" aria-hidden="true" />
+                              <div className="hcc-text-block">
+                                <strong className="hcc-field-label">Website:</strong>
+                                <a 
+                                  href={office.website} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer" 
+                                  className="contact-link website-link"
+                                >
+                                  {office.website} <ExternalLink size={11} />
+                                </a>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
               </div>
             </div>
 
           </div>
 
           {/* ─── Embedded Interactive Location Map ─── */}
-          <div className="contact-map-section">
+          <div className="contact-map-section" id="office-locations-map">
             <div className="cms-header">
               <div>
-                <span className="eyebrow">OFFICE LOCATION & DIRECTIONS</span>
-                <h3>Find Our Regional Operating Desks</h3>
+                <span className="eyebrow">OFFICE LOCATIONS &amp; DIRECTIONS</span>
+                <h3>Find Our Official Corporate Offices</h3>
               </div>
 
-              <div className="cms-office-tabs">
-                {officeLocations.map((office) => (
+              <div className="cms-office-tabs" role="tablist" aria-label="Official Office Location Tabs">
+                {officialOffices.map((office) => (
                   <button
                     key={office.id}
                     type="button"
-                    className={`cms-tab-btn ${activeOfficeId === office.id ? 'is-active' : ''}`}
+                    role="tab"
+                    aria-selected={activeOfficeId === office.id}
+                    className={`cms-tab-btn ${activeOfficeId === office.id ? 'is-active' : ''} ${office.isHeadOffice ? 'is-head-tab' : ''}`}
                     onClick={() => setActiveOfficeId(office.id)}
                   >
                     <Building2 size={14} />
                     <span>{office.city}</span>
+                    {office.isHeadOffice && <span className="tab-head-pill">HQ</span>}
                   </button>
                 ))}
               </div>
@@ -290,7 +444,7 @@ export const Contact = () => {
             <div className="cms-map-card">
               <div className="cms-map-frame-wrapper">
                 <iframe
-                  title={`${activeOffice.name} Google Map`}
+                  title={`${activeOffice.name} — ${activeOffice.city} Google Map`}
                   src={activeOffice.mapUrl}
                   width="100%"
                   height="360"
@@ -304,15 +458,40 @@ export const Contact = () => {
 
               <div className="cms-office-meta-bar">
                 <div className="comb-info">
-                  <h4>{activeOffice.name}</h4>
-                  <p><MapPin size={13} /> {activeOffice.address}</p>
+                  <div className="comb-title-row">
+                    <h4>{activeOffice.name}</h4>
+                    {activeOffice.isHeadOffice && (
+                      <span className="office-status-badge head-office-tag">HEAD OFFICE</span>
+                    )}
+                  </div>
+                  <p><MapPin size={13} /> {activeOffice.fullAddress}</p>
                 </div>
 
                 <div className="comb-actions">
                   <div className="comb-contact-fast">
-                    <span><Phone size={13} /> {activeOffice.phone}</span>
-                    <span><Clock size={13} /> {activeOffice.hours}</span>
+                    {activeOffice.phones.length > 0 ? (
+                      activeOffice.phones.map((p, idx) => (
+                        <span key={idx}>
+                          <Phone size={13} />{' '}
+                          <a href={`tel:${p.tel}`} className="comb-link">
+                            {p.label}: {p.number}
+                          </a>
+                        </span>
+                      ))
+                    ) : activeOffice.contacts[0]?.mobile ? (
+                      <span>
+                        <Phone size={13} />{' '}
+                        <a href={`tel:${activeOffice.contacts[0].tel}`} className="comb-link">
+                          {activeOffice.contacts[0].name}: {activeOffice.contacts[0].mobile}
+                        </a>
+                      </span>
+                    ) : null}
+
+                    {activeOffice.contacts[0]?.name && (
+                      <span><User size={13} /> {activeOffice.contacts.map(c => c.name).join(' · ')}</span>
+                    )}
                   </div>
+
                   <a
                     href={activeOffice.directionsUrl}
                     target="_blank"

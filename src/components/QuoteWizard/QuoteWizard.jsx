@@ -52,6 +52,7 @@ export const QuoteWizard = () => {
     submit,
     reset
   } = useFormSubmit({
+    endpoint: import.meta.env.VITE_QUOTE_ENDPOINT || null,
     defaultValues: {
       service: 'Air Freight',
       origin: '',
